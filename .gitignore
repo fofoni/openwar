@@ -4,3 +4,4 @@
 [Cc][Mm]ake*
 # do not ignore CMakeLists.txt
 !CMakeLists.txt
+openwar
