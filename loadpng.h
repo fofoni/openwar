@@ -12,7 +12,7 @@ class loadpng_except : public exception {
     virtual const char* what() const throw() {
         return "Could not open file.";
     }
-} cant_loadpng;
+};
 
 /** loadpng
  *     loads a png file into an opengl texture object
