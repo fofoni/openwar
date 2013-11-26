@@ -6,38 +6,39 @@ http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_l
 #include <GL/glu.h>
 #include <png.h>
 #include <string>
+#include <cstdio>
 
 #include "loadpng.h"
 
 using namespace std;
 
-GLuint loadTexture(const string filename, int &width, int &height)
+/// for the exceptions!! http://stackoverflow.com/questions/8618060/c-exception-subclass-string-member-variable
+
+GLuint loadpng(const string filename, int &width, int &height)
 {
-    //header for testing if it is a png
+    // header for testing if it is a png
     png_byte header[8];
 
-    //open file as binary
+    // open file as binary
     FILE *fp = fopen(filename.c_str(), "rb");
-    if (!fp) {
-        return TEXTURE_LOAD_ERROR;
-    }
+    if (!fp)
+        throw loadpng_except(std::string("Can't open texture file `") + filename + "'.");
 
-    //read the header
+    // read the header
     fread(header, 1, 8, fp);
 
-    //test if png
-    int is_png = !png_sig_cmp(header, 0, 8);
-    if (!is_png) {
+    // test if it is png
+    if (png_sig_cmp(header, 0, 8)) {
         fclose(fp);
-        return TEXTURE_LOAD_ERROR;
+        throw loadpng_except(std::string("Texture file `") + filename + "' should be PNG.");
     }
 
-    //create png struct
+    // create png struct
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
                                                  NULL, NULL);
     if (!png_ptr) {
         fclose(fp);
-        return (TEXTURE_LOAD_ERROR);
+        throw loadpng_except("Can't read data from the texture file");
     }
 
     //create png info struct
