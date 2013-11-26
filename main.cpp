@@ -29,7 +29,7 @@ void handle_keypress(unsigned char key, int x, int y) {
 void init_render() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_COLOR_MATERIAL);
-    glClearColor(.14, .18, .2, 1.0);
+    glClearColor(.14, .18, .2, 1);
     glEnable(GL_LIGHTING); //Enable lighting
     glEnable(GL_LIGHT0); //Enable light #0
     glEnable(GL_LIGHT1); //Enable light #1
@@ -61,8 +61,8 @@ void draw_scene() {
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
 
     // positioned light
-    GLfloat light_color0[] = {1.f, .5f, .5f, 1.f};
-    GLfloat light_pos0[] = {0.f, 1.f, 0.f, 1.f};
+    GLfloat light_color0[] = {1, .5, .5, 1};
+    GLfloat light_pos0[] = {0, 1, 0, 1};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos0);
 
