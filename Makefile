@@ -1,9 +1,7 @@
 CC = g++
-CFLAGS = -Wall -pedantic
+CFLAGS = -Wall -Wextra -pedantic -O2 -march=native
 PROG = openwar
-
 SRCS = main.cpp
-
 LIBS = -lglut -lGLU
 
 all : $(PROG)
