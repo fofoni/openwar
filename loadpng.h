@@ -1,12 +1,10 @@
-/* Taken mostly from:
-http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example
-*/
+// C++ version adapted from the C version at:
+// http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example
 
 #ifndef LOADPNG_H
 #define LOADPNG_H
 
 #include <GL/gl.h>
-#include <string>
 #include <stdexcept>
 
 #define E_MEMBLOCK "Cannot allocate memory for the given texture file."

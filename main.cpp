@@ -1,5 +1,4 @@
 #include <iostream>
-#include <exception>
 
 #include "loadpng.h"
 
@@ -44,6 +43,7 @@ void init_render() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE);
+    glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
     tex.id = loadpng("tex_teste.png", tex.w, tex.h);
@@ -101,6 +101,7 @@ void draw_scene() {
         glVertex3f(-0.4f, 0.5f, 0.0f);
 
     glEnd();
+    glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
     // Pentagon

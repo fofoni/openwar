@@ -1,12 +1,7 @@
-/* Taken mostly from:
-http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example
-*/
+// C++ version adapted from the C version at:
+// http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example
 
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <png.h>
-#include <string>
-#include <cstdio>
 
 #include "loadpng.h"
 
