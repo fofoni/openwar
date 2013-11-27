@@ -8,6 +8,10 @@
 # include <GL/glut.h>
 #endif
 
+namespace Key {
+    const int ESC = 27;
+}
+
 using namespace std;
 
 float angle = 0;
@@ -21,7 +25,7 @@ class esc_except : public exception {
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
-        case 27: // ESC
+        case Key::ESC:
             throw escape;
     }
 }
