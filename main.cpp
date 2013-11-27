@@ -12,9 +12,6 @@
 
 using namespace std;
 
-float angle = 0;
-float blue = .65;
-
 class texture {
 public:
     GLuint id;
@@ -22,6 +19,8 @@ public:
     texture(int id=-1, int w=-1, int h=-1) : id(id), w(w), h(h) {}
 };
 
+float angle = 0;
+float blue = .65;
 texture tex;
 
 class esc_except : public exception {
@@ -83,15 +82,22 @@ void draw_scene() {
     glPushMatrix();
     glTranslatef(0, -1, 0);
     glRotatef(angle, 0, 0, 1);
+    glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, tex.id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBegin(GL_QUADS);
 
-        glColor3f(0.5f, 0.0f, 1-blue);
+        glColor3f(0.5f, 1, 1-blue);
+        glTexCoord2f(0, 0);
         glVertex3f(-0.7f, -0.5f, 0.0f);
-        glColor3f(0.0f, 0.9f, 0.0f);
+//         glColor3f(0.0f, 0.9f, 0.0f);
+        glTexCoord2f(1, 0);
         glVertex3f(0.7f, -0.5f, 0.0f);
-        glColor3f(1.0f, 0.0f, 0.0f);
+//         glColor3f(1.0f, 0.0f, 0.0f);
+        glTexCoord2f(1, 1);
         glVertex3f(0.4f, 0.5f, 0.0f);
-        glColor3f(0.0f, 0.65f, blue);
+        glColor3f(0.0f, 0.65, blue);
+        glTexCoord2f(0, 1);
         glVertex3f(-0.4f, 0.5f, 0.0f);
 
     glEnd();
