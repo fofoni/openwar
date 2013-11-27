@@ -1,8 +1,8 @@
 CC = g++
 CFLAGS = -Wall -Wextra -pedantic -O2 -march=native
 PROG = openwar
-SRCS = main.cpp
-LIBS = -lglut -lGLU
+SRCS = main.cpp loadpng.cpp
+LIBS = -lglut -lGLU -lpng
 
 all : $(PROG)
 

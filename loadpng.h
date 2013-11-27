@@ -7,11 +7,28 @@ http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_l
 
 #include <GL/gl.h>
 #include <string>
+#include <stdexcept>
 
-class loadpng_except : public exception {
+#define E_MEMBLOCK "Cannot allocate memory for the given texture file."
+#define E_ROWS "Cannot allocate memory for reading through the texture image."
+
+class loadpng_badmem : public std::exception {
+    int e;
+public:
+    loadpng_badmem(int err) : e(err) {}
     virtual const char* what() const throw() {
-        return "Could not open file.";
+        switch (e) {
+            case 0:
+                return E_MEMBLOCK;
+            case 1:
+                return E_ROWS;
+        }
     }
+};
+
+class loadpng_error : public std::runtime_error {
+public:
+    loadpng_error(std::string const& error) : std::runtime_error(error) {}
 };
 
 /** loadpng
@@ -25,6 +42,6 @@ class loadpng_except : public exception {
  *
  */
 
-GLuint loadpng(const string filename, int &width, int &height);
+GLuint loadpng(const std::string filename, int &width, int &height);
 
 #endif

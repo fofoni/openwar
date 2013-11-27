@@ -21,8 +21,10 @@ GLuint loadpng(const string filename, int &width, int &height)
 
     // open file as binary
     FILE *fp = fopen(filename.c_str(), "rb");
-    if (!fp)
-        throw loadpng_except(std::string("Can't open texture file `") + filename + "'.");
+    if (!fp) {
+        throw loadpng_error(std::string("Can't open texture file `") +
+                            filename + "'.");
+    }
 
     // read the header
     fread(header, 1, 8, fp);
@@ -30,7 +32,8 @@ GLuint loadpng(const string filename, int &width, int &height)
     // test if it is png
     if (png_sig_cmp(header, 0, 8)) {
         fclose(fp);
-        throw loadpng_except(std::string("Texture file `") + filename + "' should be PNG.");
+        throw loadpng_error(std::string("Texture file `") + filename +
+                            "' should be PNG.");
     }
 
     // create png struct
@@ -38,7 +41,10 @@ GLuint loadpng(const string filename, int &width, int &height)
                                                  NULL, NULL);
     if (!png_ptr) {
         fclose(fp);
-        throw loadpng_except("Can't read data from the texture file");
+        throw loadpng_error(
+            std::string("Can't read data from the texture file `") +
+            filename + "'."
+        );
     }
 
     //create png info struct
@@ -46,7 +52,10 @@ GLuint loadpng(const string filename, int &width, int &height)
     if (!info_ptr) {
         png_destroy_read_struct(&png_ptr, (png_infopp) NULL, (png_infopp) NULL);
         fclose(fp);
-        return (TEXTURE_LOAD_ERROR);
+        throw loadpng_error(
+            std::string("Error creating PNG info struct from texture file `") +
+            filename + "'. (1)"
+        );
     }
 
     //create png info struct
@@ -54,14 +63,18 @@ GLuint loadpng(const string filename, int &width, int &height)
     if (!end_info) {
         png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
         fclose(fp);
-        return (TEXTURE_LOAD_ERROR);
+        throw loadpng_error(
+            std::string("Error creating PNG info struct from texture file `") +
+            filename + "'. (2)"
+        );
     }
 
     //png error stuff, not sure libpng man suggests this.
     if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         fclose(fp);
-        return (TEXTURE_LOAD_ERROR);
+        throw loadpng_error(std::string("PNG error in texture file `") +
+                            filename + "'.");
     }
 
     //init png reading
@@ -97,19 +110,21 @@ GLuint loadpng(const string filename, int &width, int &height)
         //clean up memory and close stuff
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         fclose(fp);
-        return TEXTURE_LOAD_ERROR;
+        throw loadpng_badmem(0);
     }
 
-    //row_pointers is for pointing to image_data for reading the png with libpng
+    // row_pointers is for pointing to image_data for reading the png with
+    // libpng
     png_bytep *row_pointers = new png_bytep[height];
     if (!row_pointers) {
         //clean up memory and close stuff
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         delete[] image_data;
         fclose(fp);
-        return TEXTURE_LOAD_ERROR;
+        throw loadpng_badmem(1);
     }
-    // set the individual row_pointers to point at the correct offsets of image_data
+    // set the individual row_pointers to point at the correct offsets of
+    // image_data
     for (int i = 0; i < height; ++i)
         row_pointers[height - 1 - i] = image_data + i * rowbytes;
 
