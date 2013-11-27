@@ -1,6 +1,8 @@
 #include <iostream>
 #include <exception>
 
+#include "loadpng.h"
+
 #ifdef __APPLE__
 # include <OpenGL/OpenGL.h>
 # include <GLUT/glut.h>
@@ -12,6 +14,15 @@ using namespace std;
 
 float angle = 0;
 float blue = .65;
+
+class texture {
+public:
+    GLuint id;
+    int w, h;
+    texture(int id=-1, int w=-1, int h=-1) : id(id), w(w), h(h) {}
+};
+
+texture tex;
 
 class esc_except : public exception {
     virtual const char* what() const throw() {
@@ -27,14 +38,16 @@ void handle_keypress(unsigned char key, int x, int y) {
 }
 
 void init_render() {
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_COLOR_MATERIAL);
     glClearColor(.14, .18, .2, 1.0);
-    glEnable(GL_LIGHTING); //Enable lighting
-    glEnable(GL_LIGHT0); //Enable light #0
-    glEnable(GL_LIGHT1); //Enable light #1
-    glEnable(GL_NORMALIZE); //Automatically normalize normals
-    glShadeModel(GL_SMOOTH); //Enable smooth shading
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+
+    tex.id = loadpng("tex_teste.png", tex.w, tex.h);
 }
 
 void handle_resize(int w, int h) {
@@ -57,7 +70,7 @@ void draw_scene() {
     glTranslatef(0, 0, -5);
 
     // ambient light
-    GLfloat ambient_color[] = {.2, .2, .2, 1};
+    GLfloat ambient_color[] = {.4, .4, .4, 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
 
     // positioned light
@@ -87,7 +100,7 @@ void draw_scene() {
     // Pentagon
     glPushMatrix();
     glTranslatef(1, 1, 0);
-    glRotatef(angle, 0, 1, 0);
+    glRotatef(angle, 1, 2, 3);
     glScalef(.5, .5, .5);
     glBegin(GL_TRIANGLES);
 
@@ -109,7 +122,7 @@ void draw_scene() {
     // Triangle
     glPushMatrix();
     glTranslatef(-1, 1, 0);
-    glRotatef(angle, 1, 2, 3);
+    glRotatef(angle, 0, 1, 0);
     glBegin(GL_TRIANGLES);
 
         glNormal3f(1.f, 0.f, 1.f);
@@ -131,7 +144,7 @@ void update(int value) {
     angle += 2;
     if (angle >= 180) angle -= 360;
 
-    blue += .005;
+    blue += .0005;
     if (blue >= 1) blue -= 1;
 
     glutPostRedisplay();

@@ -22,6 +22,8 @@ public:
                 return E_MEMBLOCK;
             case 1:
                 return E_ROWS;
+            default:
+                return "Unknown memory error while loading texture file.";
         }
     }
 };

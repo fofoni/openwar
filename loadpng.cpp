@@ -12,8 +12,6 @@ http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_l
 
 using namespace std;
 
-/// for the exceptions!! http://stackoverflow.com/questions/8618060/c-exception-subclass-string-member-variable
-
 GLuint loadpng(const string filename, int &width, int &height)
 {
     // header for testing if it is a png
