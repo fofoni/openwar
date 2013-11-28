@@ -13,10 +13,18 @@ SRCS = main.cpp loadpng.cpp
 LIBS = -lglut -lGLU -lpng
 HEADS = loadpng.h
 
-all : $(PROG)
+TEXTURE_MAIN = earth_tex.png
+XCF_MAIN = earth_map.xcf
+
+all : $(PROG) $(TEXTURE_MAIN)
 
 $(PROG) : $(SRCS) $(HEADS)
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
+
+$(TEXTURE_MAIN) : $(XCF_MAIN)
+	xcf2png $(XCF_MAIN) -o temp.png
+	convert temp.png -resize "1024x1024!" $(TEXTURE_MAIN)
+	rm -f temp.png
 
 clean :
 	rm -f $(PROG)

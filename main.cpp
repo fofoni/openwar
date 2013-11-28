@@ -20,8 +20,8 @@
 #endif
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
-const int WORLD_LAT_QTD = 15;
-const int WORLD_LONG_QTD = 30;
+const int WORLD_LAT_QTD = 50;
+const int WORLD_LONG_QTD = 100;
 
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
 const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
@@ -35,7 +35,7 @@ namespace Key {
 int latitude = 0, longitude = 0;
 
 GLuint world_texture;
-int wt_width=256, wt_height=256;
+int wt_width=1024, wt_height=1024;
 
 using namespace std;
 
@@ -50,10 +50,10 @@ void handle_keypress(unsigned char key, int x, int y) {
         case Key::ESC:
             /*throw escape*/; break;
         case 'a':
-            longitude -= 10; // TODO: make this number depend on the zoom level
+            longitude -= -10; // TODO: make this number depend on the zoom level
             break;
         case 'd':
-            longitude += 10;
+            longitude += -10;
             break;
         case 's':
             latitude -= 10;
