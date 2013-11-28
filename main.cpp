@@ -11,8 +11,8 @@
 #endif
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
-const int WORLD_LAT_QTD = 5;
-const int WORLD_LONG_QTD = 10;
+const int WORLD_LAT_QTD = 15;
+const int WORLD_LONG_QTD = 30;
 
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
 const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
@@ -26,7 +26,7 @@ namespace Key {
 int latitude = 0, longitude = 0;
 
 GLuint world_texture;
-int wt_width, wt_height;
+int wt_width=256, wt_height=256;
 
 using namespace std;
 
@@ -39,7 +39,7 @@ using namespace std;
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
         case Key::ESC:
-            /*throw escape*/;
+            /*throw escape*/; break;
         case 'a':
             longitude -= 10; // TODO: make this number depend on the zoom level
             break;
@@ -67,7 +67,7 @@ void init_render() {
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
-//     world_texture = loadpng("earth.png", wt_width, wt_height);
+    world_texture = loadpng("earth_tex.png", wt_width, wt_height);
 
 }
 
@@ -99,30 +99,34 @@ void draw_scene() {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos0);
 
-    glTranslatef(0, 0, -4);
+    glTranslatef(0, 0, -3);
     glRotatef(latitude, 1, 0, 0);
     glRotatef(longitude, 0, 1, 0);
 
     // draw sphere representing earth
-    /* glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, tex.id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); */
-    glColor3f(0, 0, 1);
+    glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, world_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     for (int j = 1; j <= WORLD_LAT_QTD; j++) {
         glBegin(GL_TRIANGLE_STRIP);
         for (int i = 0; i <= WORLD_LONG_QTD; i++) {
+
             glNormal3f(sph_vertices[i][j-1][0], sph_vertices[i][j-1][1],
                        sph_vertices[i][j-1][2]);
+            glTexCoord2f(float(double(i)/double(WORLD_LONG_QTD)), 1-float(double(j-1)/double(WORLD_LAT_QTD)));
             glVertex3f(sph_vertices[i][j-1][0], sph_vertices[i][j-1][1],
                        sph_vertices[i][j-1][2]);
+
             glNormal3f(sph_vertices[i][j][0], sph_vertices[i][j][1],
                        sph_vertices[i][j][2]);
+            glTexCoord2f(float(double(i)/double(WORLD_LONG_QTD)), 1-float(double(j)/double(WORLD_LAT_QTD)));
             glVertex3f(sph_vertices[i][j][0], sph_vertices[i][j][1],
                        sph_vertices[i][j][2]);
+
         }
         glEnd();
     }
-    /* glDisable(GL_TEXTURE_2D); */
+    glDisable(GL_TEXTURE_2D);
 
     glutSwapBuffers();
 
@@ -149,7 +153,6 @@ int main(int argc, char** argv) {
     glutDisplayFunc(draw_scene);
     glutKeyboardFunc(handle_keypress);
     glutReshapeFunc(handle_resize);
-//     glutTimerFunc(25, update, 0);
 
     try {
         glutMainLoop();
