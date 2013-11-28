@@ -30,16 +30,16 @@ int wt_width, wt_height;
 
 using namespace std;
 
-class esc_except : public exception {
-    virtual const char* what() const throw() {
-        return "ESC key pressed";
-    }
-} escape;
+// class esc_except : public exception {
+//     virtual const char* what() const throw() {
+//         return "ESC key pressed";
+//     }
+// } escape;
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
         case Key::ESC:
-            throw escape;
+            /*throw escape*/;
         case 'a':
             longitude -= 10; // TODO: make this number depend on the zoom level
             break;
@@ -53,7 +53,6 @@ void handle_keypress(unsigned char key, int x, int y) {
             latitude += 10;
             break;
     }
-//     cout  << int(key) << "; long = " << longitude << endl;
     glutPostRedisplay();
 }
 
