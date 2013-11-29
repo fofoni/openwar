@@ -18,10 +18,10 @@ ifeq ($(OS),fedora)
 endif
 HEADS = loadpng.h
 
-TEXTURE_MAIN = earth_tex.png
-XCF_MAIN = earth_map.xcf
-TEXTURE_GRAPH = earth_graph.png
-XCF_GRAPH = earth_graph.xcf
+TEXTURE_MAIN = imgs/earth_tex.png
+XCF_MAIN = imgs/earth_map.xcf
+TEXTURE_GRAPH = imgs/earth_graph.png
+XCF_GRAPH = imgs/earth_graph.xcf
 
 all : $(PROG) $(TEXTURE_MAIN) $(TEXTURE_GRAPH)
 
