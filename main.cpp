@@ -76,7 +76,7 @@ void init_render() {
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
-    world_texture = loadpng("earth_tex.png", wt_width, wt_height);
+    world_texture = loadpng("imgs/earth_tex.png", wt_width, wt_height);
 
 }
 
