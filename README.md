@@ -8,3 +8,5 @@ Graphics) chair at UFRJ (2013.2): http://www.lcg.ufrj.br/Cursos/CGECI.
 http://www.gamedev.net/topic/606182-how-to-draw-a-earth/.
 * `loadpng.cpp` adapted from
 http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example.
+* `os_test.sh` taken from
+http://www.daniweb.com/software-development/shell-scripting/threads/396624/makefile-determines-different-distributions#post1703429.
