@@ -1,11 +1,10 @@
 OpenWAR
 =======
 
-WAR-like game based on OpenGL for the EEL882 (Introduction to Computer
-Graphics) chair at UFRJ (2013.2): http://www.lcg.ufrj.br/Cursos/CGECI.
+WAR-like game based on OpenGL for the EEL882 (Introduction to Computer Graphics)
+chair at UFRJ (2013.2): http://www.lcg.ufrj.br/Cursos/CGECI.
 
-* Earth texture adapted from
-http://www.gamedev.net/topic/606182-how-to-draw-a-earth/.
+* Earth texture adapted from http://learningwebgl.com/blog/?p=1778.
 * `loadpng.cpp` adapted from
 http://en.wikibooks.org/wiki/OpenGL_Programming/Intermediate/Textures#A_simple_libpng_example.
 * `os_test.sh` taken from

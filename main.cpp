@@ -29,21 +29,16 @@ const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
 float sph_vertices[WORLD_LONG_QTD][WORLD_LAT_QTD+1][3];
 
 namespace Key {
-    const int ESC = 27;
+    static const unsigned char ESC = 27;
 }
 
 int latitude = 0, longitude = 0;
 
-GLuint world_texture;
-int wt_width=1024, wt_height=1024;
+GLuint world_tex_map, world_tex_graph, world_curr_tex;
+int wtm_width = 1024, wtm_height = 1024,
+    wtg_width = 1024, wtg_height = 1024;
 
 using namespace std;
-
-// class esc_except : public exception {
-//     virtual const char* what() const throw() {
-//         return "ESC key pressed";
-//     }
-// } escape;
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
@@ -61,6 +56,12 @@ void handle_keypress(unsigned char key, int x, int y) {
         case 'w':
             latitude += 10;
             break;
+        case 'v':
+            if (world_curr_tex == world_tex_map)
+                world_curr_tex = world_tex_graph;
+            else
+                world_curr_tex = world_tex_map;
+            break;
     }
     glutPostRedisplay();
 }
@@ -76,7 +77,9 @@ void init_render() {
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
-    world_texture = loadpng("imgs/earth_tex.png", wt_width, wt_height);
+    world_tex_map = loadpng("imgs/earth_tex.png", wtm_width, wtm_height);
+    world_tex_graph = loadpng("imgs/earth_graph.png", wtg_width, wtg_height);
+    world_curr_tex = world_tex_map;
 
 }
 
@@ -103,8 +106,8 @@ void draw_scene() {
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
 
     // positioned light
-    GLfloat light_color0[] = {.5, .5, .5, 1};
-    GLfloat light_pos0[] = {-1, 1, 0, 1};
+    GLfloat light_color0[] = {5, 5, 5, 1};
+    GLfloat light_pos0[] = {-2, 3, 0, 1};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos0);
 
@@ -113,7 +116,7 @@ void draw_scene() {
     glRotatef(longitude, 0, 1, 0);
 
     // draw sphere representing earth
-    glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, world_texture);
+    glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, world_curr_tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     for (int j = 1; j <= WORLD_LAT_QTD; j++) {
