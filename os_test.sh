@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# taken from
+# http://www.daniweb.com/software-development/shell-scripting/threads/396624/makefile-determines-different-distributions#post1703429
+
 # Check for FreeBSD in the uname output
 # If it's not FreeBSD, then we move on!
 if [ "$(uname -s)" == 'FreeBSD' ]; then
