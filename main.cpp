@@ -8,6 +8,14 @@
  */
 
 #include <iostream>
+
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include <vector>
+#include <map>
+
 #include <cmath>
 
 #include "loadpng.h"
@@ -18,6 +26,16 @@
 #else
 # include <GL/glut.h>
 #endif
+
+using namespace std;
+
+class Terr {
+public:
+    float x, y;
+    Terr(float x, float y) : x(x), y(y) {}
+    ~Terr() {}
+    vector<int> frontiers;
+};
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
 const int WORLD_LAT_QTD = 50;
@@ -38,7 +56,7 @@ GLuint world_tex_map, world_tex_graph, world_curr_tex;
 int wtm_width = 1024, wtm_height = 1024,
     wtg_width = 1024, wtg_height = 1024;
 
-using namespace std;
+vector<Terr> graph;
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
@@ -146,6 +164,7 @@ void draw_scene() {
 
 int main(int argc, char** argv) {
 
+    // sphere vertices
     // we should be able to calculate these at compile-time, actually
     for (int j = 0; j <= WORLD_LAT_QTD; j++) {
         for (int i = 0; i <= WORLD_LONG_QTD; i++) {
@@ -153,6 +172,57 @@ int main(int argc, char** argv) {
             sph_vertices[i][j][1] = cos(j*WORLD_LAT_EPS);
             sph_vertices[i][j][2] = -sin(j*WORLD_LAT_EPS)*cos(i*WORLD_LONG_EPS);
         }
+    }
+
+    // load territories data
+    {
+        string line;
+        char filename[] = "terr_db";
+        ifstream file (filename);
+        if (!file.is_open()) {
+            cerr << "Cannot open database file `" << filename << "'" << endl;
+            return 1;
+        }
+        map<string, int> names;
+        for (int count=0; getline(file, line); count++) {
+            if (line.length() == 0) { count--; continue; }
+            if (line[0] == '#') { count--; continue; }
+            istringstream iss(line);
+            string word;
+            float x, y;
+            iss >> word;
+            names[word] = count;
+            iss >> x >> y;
+            graph.push_back(Terr(x/1024, 1-y/512));
+        }
+        file.clear();
+        file.seekg(0, file.beg);
+        for (int count=0; getline(file, line); count++) {
+            if (line.length() == 0) { count --; continue; }
+            if (line[0] == '#') { count--; continue; }
+            istringstream iss(line);
+            string word, remain;
+            iss >> word;
+            iss >> word;
+            iss >> word;
+            while (iss) {
+                streampos save = iss.tellg(); getline(iss, remain);
+                cout << "remain is [[" << remain << "]]" << endl; iss.seekg(save);
+                iss >> word;
+                if (word.length() == 0) continue;
+                cout << "pushing " << word << " into " << count << endl;
+                graph[count].frontiers.push_back(names[word]);
+            }
+        }
+        file.close();
+    }
+
+    for (unsigned int i = 0; i < graph.size(); i++) {
+        cout << i << "(" << graph[i].x << ", " << graph[i].y << ") ";
+        for (unsigned int j = 0; j < graph[i].frontiers.size(); j++) {
+            cout << graph[i].frontiers[j] << " ";
+        }
+        cout << endl;
     }
 
     glutInit(&argc, argv);
@@ -166,12 +236,12 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(handle_keypress);
     glutReshapeFunc(handle_resize);
 
-    try {
-        glutMainLoop();
-    }
-    catch (exception& e) {
-        cout << "Bye." << endl;
-    }
+    // try {
+    glutMainLoop();
+    // }
+    // catch (exception& e) {
+    //     cout << "Bye." << endl;
+    // }
 
     return 0;
 
