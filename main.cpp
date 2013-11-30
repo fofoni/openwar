@@ -187,12 +187,12 @@ int main(int argc, char** argv) {
         for (int count=0; getline(file, line); count++) {
             if (line.length() == 0) { count--; continue; }
             if (line[0] == '#') { count--; continue; }
-            istringstream iss(line);
+            istringstream ss(line);
             string word;
             float x, y;
-            iss >> word;
+            ss >> word;
             names[word] = count;
-            iss >> x >> y;
+            ss >> x >> y;
             graph.push_back(Terr(x/1024, 1-y/512));
         }
         file.clear();
@@ -200,29 +200,14 @@ int main(int argc, char** argv) {
         for (int count=0; getline(file, line); count++) {
             if (line.length() == 0) { count --; continue; }
             if (line[0] == '#') { count--; continue; }
-            istringstream iss(line);
-            string word, remain;
-            iss >> word;
-            iss >> word;
-            iss >> word;
-            while (iss) {
-                streampos save = iss.tellg(); getline(iss, remain);
-                cout << "remain is [[" << remain << "]]" << endl; iss.seekg(save);
-                iss >> word;
-                if (word.length() == 0) continue;
-                cout << "pushing " << word << " into " << count << endl;
+            istringstream ss(line);
+            string word;
+            // discard first three words (name, x coord, y coord)
+            ss >> word; ss >> word; ss >> word;
+            while (ss >> word)
                 graph[count].frontiers.push_back(names[word]);
-            }
         }
         file.close();
-    }
-
-    for (unsigned int i = 0; i < graph.size(); i++) {
-        cout << i << "(" << graph[i].x << ", " << graph[i].y << ") ";
-        for (unsigned int j = 0; j < graph[i].frontiers.size(); j++) {
-            cout << graph[i].frontiers[j] << " ";
-        }
-        cout << endl;
     }
 
     glutInit(&argc, argv);
