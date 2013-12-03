@@ -12,7 +12,7 @@ CC = g++
 CFLAGS = -Wall -Wextra -pedantic -O2 -march=native
 PROG = openwar
 SRCS = main.cpp loadpng.cpp
-LIBS = -lglut -lGLU -lpng
+LIBS = -lglut -lGLU -lpng -lGLEW
 ifeq ($(OS),fedora)
     LIBS += -lGL
 endif
