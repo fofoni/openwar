@@ -30,6 +30,8 @@
 
 using namespace std;
 
+const char *OpenWAR_VERSION = "v0";
+
 class Terr {
 public:
     float x, y;
@@ -164,6 +166,10 @@ void draw_scene() {
 }
 
 int main(int argc, char** argv) {
+
+    cout << "OpenWAR " << OpenWAR_VERSION << endl;
+    cout << endl;
+
 
     // sphere vertices
     // we should be able to calculate these at compile-time, actually
