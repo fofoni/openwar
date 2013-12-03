@@ -30,7 +30,7 @@
 
 using namespace std;
 
-const char *OpenWAR_VERSION = "v0";
+const char *OpenWAR_VERSION = "v0"; // TODO: get from `get-git-version.h .`
 
 class Terr {
 public:
