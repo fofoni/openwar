@@ -41,7 +41,7 @@ public:
 };
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
-const int WORLD_LAT_QTD = 50;
+const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
 const int WORLD_LONG_QTD = 100;
 
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
@@ -170,8 +170,8 @@ int main(int argc, char** argv) {
     cout << "OpenWAR " << OpenWAR_VERSION << endl;
     cout << endl;
 
-
     // sphere vertices
+    cout << "Calculating sphere vertices...";
     // we should be able to calculate these at compile-time, actually
     for (int j = 0; j <= WORLD_LAT_QTD; j++) {
         for (int i = 0; i <= WORLD_LONG_QTD; i++) {
@@ -180,11 +180,13 @@ int main(int argc, char** argv) {
             sph_vertices[i][j][2] = -sin(j*WORLD_LAT_EPS)*cos(i*WORLD_LONG_EPS);
         }
     }
+    cout << endl;
 
     // load territories data
+    cout << "Loading territories and frontiers data...";
     {
         string line;
-        char filename[] = "terr_db";
+        char filename[] = "terr_db"; // TODO: make configurable at runtime
         ifstream file (filename);
         if (!file.is_open()) {
             cerr << "Cannot open database file `" << filename << "'" << endl;
@@ -216,6 +218,7 @@ int main(int argc, char** argv) {
         }
         file.close();
     }
+    cout << endl;
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
