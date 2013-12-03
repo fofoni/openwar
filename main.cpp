@@ -222,6 +222,8 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(handle_keypress);
     glutReshapeFunc(handle_resize);
 
+    glewInit();
+
     // try {
     glutMainLoop();
     // }
