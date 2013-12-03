@@ -61,8 +61,8 @@ vector<Terr> graph;
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
-        case Key::ESC:
-            /*throw escape*/; break;
+        // case Key::ESC:
+        //    throw escape;
         case 'a':
             longitude -= -10; // TODO: make this number depend on the zoom level
             break;
