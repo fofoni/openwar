@@ -7,6 +7,10 @@
  *
  */
 
+/*****************************************
+************** STL includes **************
+*****************************************/
+
 #include <iostream>
 
 #include <fstream>
@@ -16,7 +20,15 @@
 #include <vector>
 #include <map>
 
+/******************************************
+************** math includes **************
+******************************************/
+
 #include <cmath>
+
+/********************************************
+************** OpenGL includes **************
+********************************************/
 
 #include <GL/glew.h>
 #ifdef __APPLE__
@@ -28,17 +40,30 @@
 
 #include "loadpng.h"
 
-using namespace std;
+/****************************************
+************** definitions **************
+****************************************/
 
-const char *OpenWAR_VERSION = "v0"; // TODO: get from `get-git-version.h .`
+// version string
+#define TOSTR_(x...) #x // needs to be variadic because x might contain commas
+#define STRINGIFY(x) TOSTR_(x)
+#ifdef OpenWAR_VERSION
+# define OpenWAR_VERSION_STR STRINGIFY(OpenWAR_VERSION)
+#else
+# define OpenWAR_VERSION_STR "v???"
+#endif
 
 class Terr {
 public:
     float x, y;
     Terr(float x, float y) : x(x), y(y) {}
     ~Terr() {}
-    vector<int> frontiers;
+    std::vector<int> frontiers;
 };
+
+namespace Key {
+    static const unsigned char ESC = 27;
+}
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
@@ -47,11 +72,9 @@ const int WORLD_LONG_QTD = 100;
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
 const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
 
-float sph_vertices[WORLD_LONG_QTD][WORLD_LAT_QTD+1][3];
-
-namespace Key {
-    static const unsigned char ESC = 27;
-}
+/****************************************
+************** global vars **************
+****************************************/
 
 int latitude = 0, longitude = 0;
 
@@ -59,7 +82,15 @@ GLuint world_tex_map, world_tex_graph, world_curr_tex;
 int wtm_width = 1024, wtm_height = 1024,
     wtg_width = 1024, wtg_height = 1024;
 
-vector<Terr> graph;
+float sph_vertices[WORLD_LONG_QTD+1][WORLD_LAT_QTD+1][3];
+
+std::vector<Terr> graph;
+
+/******************************************
+************** GLUT routines **************
+******************************************/
+
+using namespace std;
 
 void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
@@ -165,9 +196,13 @@ void draw_scene() {
 
 }
 
+/**************************************
+************** main prog **************
+**************************************/
+
 int main(int argc, char** argv) {
 
-    cout << "OpenWAR " << OpenWAR_VERSION << endl;
+    cout << "OpenWAR" << endl << OpenWAR_VERSION_STR << endl;
     cout << endl;
 
     // sphere vertices

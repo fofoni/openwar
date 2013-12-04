@@ -7,9 +7,11 @@
 #
 
 OS=$(shell bash os_test.sh)
+VERSION_STR=$(shell bash get-git-version.sh .)
 
 CC = g++
-CFLAGS = -Wall -Wextra -pedantic -O2 -march=native
+CFLAGS = -Wall -Wextra -pedantic -O2 -march=native \
+         -D OpenWAR_VERSION=$(VERSION_STR)
 PROG = openwar
 SRCS = main.cpp loadpng.cpp
 LIBS = -lglut -lGLU -lpng
@@ -17,6 +19,7 @@ ifeq ($(OS),fedora)
     LIBS += -lGL
 endif
 HEADS = loadpng.h
+SCRIPTS = get-git-version.sh os_test.sh
 
 TEXTURE_MAIN = imgs/earth_tex.png
 XCF_MAIN = imgs/earth_map.xcf
@@ -25,7 +28,7 @@ XCF_GRAPH = imgs/earth_graph.xcf
 
 all : $(PROG) $(TEXTURE_MAIN) $(TEXTURE_GRAPH)
 
-$(PROG) : $(SRCS) $(HEADS)
+$(PROG) : $(SRCS) $(HEADS) $(SCRIPTS)
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 $(TEXTURE_MAIN) : $(XCF_MAIN)

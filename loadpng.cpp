@@ -29,7 +29,11 @@ GLuint loadpng(const string filename, int &width, int &height)
     }
 
     // read the header
-    fread(header, 1, 8, fp);
+    if (fread(header, 1, 8, fp) != 8) {
+        fclose(fp);
+        throw loadpng_error(std::string("Error reading from texture file `") +
+        filename + "'.");
+    };
 
     // test if it is png
     if (png_sig_cmp(header, 0, 8)) {
