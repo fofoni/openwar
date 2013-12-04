@@ -65,9 +65,24 @@ namespace Key {
     static const unsigned char ESC = 27;
 }
 
+namespace Color {
+    static const float black[] = {0, 0, 0};
+    static const float dark_green[] = {0, 0, .5};
+    static const float green[] = {0, 0, 1};
+    static const float dark_blue[] = {0, .5, 0};
+    static const float dark_cyan[] = {0, .5, .5};
+    // static const float unknown_color[] = {0, .5, 1};
+}
+
 const double TAU = 6.283185307179586477; // tau is 2*pi
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
 const int WORLD_LONG_QTD = 100;
+
+const int STONE_LONG_QTD = 3;
+const float STONE_HEIGHT = .1;
+const float STONE_RAD = .2;
+const float STONE_IN_PERC = 0.80;
+const float STONE_HOLE_PERC = 0.80;
 
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
 const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
