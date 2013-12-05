@@ -72,6 +72,7 @@ namespace Color {
     static const float dark_blue[] = {0, .5, 0};
     static const float dark_cyan[] = {0, .5, .5};
     // static const float unknown_color[] = {0, .5, 1};
+    static const float green[] = {0, 1, 0};
 }
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
