@@ -66,27 +66,58 @@ namespace Key {
 }
 
 namespace Color {
-    static const float black[] = {0, 0, 0};
-    static const float dark_green[] = {0, 0, .5};
-    static const float green[] = {0, 0, 1};
-    static const float dark_blue[] = {0, .5, 0};
-    static const float dark_cyan[] = {0, .5, .5};
-    // static const float unknown_color[] = {0, .5, 1};
-    static const float green[] = {0, 1, 0};
+    typedef float color[3];
+    static const color black = {0, 0, 0};
+    static const color dark_blue = {0, 0, .5};
+    static const color blue = {0, 0, 1};
+    static const color dark_green = {0, .5, 0};
+    static const color dark_cyan = {0, .5, .5};
+    static const color sea_blue = {0, .5, 1};
+    static const color green = {0, 1, 0};
+    static const color sea_green = {0, 1, .5};
+    static const color cyan = {0, 1, 1};
+    static const color dark_red = {.5, 0, 0};
+    static const color dark_magenta = {.5, 0, .5};
+    static const color purple = {.5, 0, 1};
+    static const color dark_yellow = {.5, .5, 0};
+    static const color gray = {.5, .5, .5};
+    static const color light_blue = {.5, .5, 1};
+    static const color lime = {.5, 1, 0};
+    static const color light_green = {.5, 1, .5};
+    static const color light_cyan = {.5, 1, 1};
+    static const color red = {1, 0, 0};
+    static const color pink = {1, 0, .5};
+    static const color magenta = {1, 0, 1};
+    static const color orange = {1, .5, 0};
+    static const color light_red = {1, .5, .5};
+    static const color light_magenta = {1, .5, 1};
+    static const color yellow = {1, 1, 0};
+    static const color light_yellow = {1, 1, .5};
+    static const color white = {1, 1, 1};
 }
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
 const int WORLD_LONG_QTD = 100;
 
-const int STONE_LONG_QTD = 3;
-const float STONE_HEIGHT = .1;
-const float STONE_RAD = .2;
-const float STONE_IN_PERC = 0.80;
-const float STONE_HOLE_PERC = 0.80;
+const int ARMY_LONG_QTD = 6;
+const float ARMY_HEIGHT = .2;
+const float ARMY_RAD = .4;
+const float ARMY_IN_PERC = 0.80;
+const float ARMY_HOLE_PERC = 0.20;
+const float ARMY_BIG_PERC = 1.2;
+static const float ARMY_HS[] = {
+    ARMY_HEIGHT * ARMY_HOLE_PERC,
+    ARMY_HEIGHT * (1-ARMY_HOLE_PERC)
+};
+static const float ARMY_HS_BIG[] = {
+    ARMY_HEIGHT * ARMY_HOLE_PERC * ARMY_BIG_PERC,
+    ARMY_HEIGHT * (1-ARMY_HOLE_PERC) * ARMY_BIG_PERC
+};
 
 const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
 const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
+const double ARMY_LONG_EPS = TAU/double(ARMY_LONG_QTD);
 
 /****************************************
 ************** global vars **************
@@ -99,12 +130,13 @@ int wtm_width = 1024, wtm_height = 1024,
     wtg_width = 1024, wtg_height = 1024;
 
 float sph_vertices[WORLD_LONG_QTD+1][WORLD_LAT_QTD+1][3];
+float army_vertices[ARMY_LONG_QTD+1][2][2];
 
 std::vector<Terr> graph;
 
-/******************************************
-************** GLUT routines **************
-******************************************/
+/*************************************************
+************** GLUT and GL routines **************
+*************************************************/
 
 using namespace std;
 
@@ -142,7 +174,7 @@ void init_render() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE);
-    glEnable(GL_CULL_FACE);
+//     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
     world_tex_map = loadpng("imgs/earth_tex.png", wtm_width, wtm_height);
@@ -156,10 +188,59 @@ void handle_resize(int w, int h) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(
-        45,                    // camera angle
+        50,                    // camera angle // TODO: get this back at 45?
         double(w) / double(h), // width-to-height ratio
         .5, 200                // near and far z clipping coordinates
     );
+}
+
+void draw_army(const Color::color c) {
+
+    glPushMatrix();
+    glTranslatef(0, 0, 1);
+
+    glColor3f(c[0], c[1], c[2]);
+
+    // draw lower cap
+    glBegin(GL_TRIANGLE_FAN);
+    glNormal3f(0, 0, -1);
+    glVertex3f(0, 0, ARMY_HS[0]);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+    }
+    glEnd();
+
+    // TODO: bottom and top caps; inner wall
+
+    // draw outer wall
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+        glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], ARMY_HEIGHT);
+        glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+        glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+    }
+    glEnd();
+
+    // draw upper cap
+    glBegin(GL_TRIANGLE_FAN);
+    glNormal3f(0, 0, 1);
+    glVertex3f(0, 0, ARMY_HS[1]);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+    }
+    glEnd();
+
+    glColor3f(1, 1, 1); // reset color
+
+    glPopMatrix();
+
 }
 
 void draw_scene() {
@@ -184,6 +265,7 @@ void draw_scene() {
     glRotatef(longitude, 0, 1, 0);
 
     // draw sphere representing earth
+    glPushMatrix();
     glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, world_curr_tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -193,13 +275,15 @@ void draw_scene() {
 
             glNormal3f(sph_vertices[i][j-1][0], sph_vertices[i][j-1][1],
                        sph_vertices[i][j-1][2]);
-            glTexCoord2f(float(double(i)/double(WORLD_LONG_QTD)), 1-float(double(j-1)/double(WORLD_LAT_QTD)));
+            glTexCoord2f(double(i)/double(WORLD_LONG_QTD),
+                         1-double(j-1)/double(WORLD_LAT_QTD));
             glVertex3f(sph_vertices[i][j-1][0], sph_vertices[i][j-1][1],
                        sph_vertices[i][j-1][2]);
 
             glNormal3f(sph_vertices[i][j][0], sph_vertices[i][j][1],
                        sph_vertices[i][j][2]);
-            glTexCoord2f(float(double(i)/double(WORLD_LONG_QTD)), 1-float(double(j)/double(WORLD_LAT_QTD)));
+            glTexCoord2f(double(i)/double(WORLD_LONG_QTD),
+                         1-double(j)/double(WORLD_LAT_QTD));
             glVertex3f(sph_vertices[i][j][0], sph_vertices[i][j][1],
                        sph_vertices[i][j][2]);
 
@@ -207,6 +291,9 @@ void draw_scene() {
         glEnd();
     }
     glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+
+    draw_army(Color::yellow);
 
     glutSwapBuffers();
 
@@ -233,6 +320,15 @@ int main(int argc, char** argv) {
     }
     cout << endl;
 
+    // army vertices
+    cout << "Calculating army vertices..." << endl;
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        army_vertices[i][0][0] = ARMY_RAD * cos(i*ARMY_LONG_EPS);
+        army_vertices[i][0][1] = ARMY_RAD * sin(i*ARMY_LONG_EPS);
+        army_vertices[i][1][0] = ARMY_RAD * cos(i*ARMY_LONG_EPS) * ARMY_IN_PERC;
+        army_vertices[i][1][1] = ARMY_RAD * sin(i*ARMY_LONG_EPS) * ARMY_IN_PERC;
+    }
+
     // load territories data
     cout << "Loading territories and frontiers data...";
     {
@@ -255,8 +351,7 @@ int main(int argc, char** argv) {
             ss >> x >> y;
             graph.push_back(Terr(x/1024, 1-y/512));
         }
-        file.clear();
-        file.seekg(0, file.beg);
+        file.clear(); file.seekg(0, file.beg); // for reading it again
         for (int count=0; getline(file, line); count++) {
             if (line.length() == 0) { count --; continue; }
             if (line[0] == '#') { count--; continue; }
