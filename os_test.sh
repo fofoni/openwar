@@ -15,11 +15,12 @@ if [ "$(uname -s)" == 'FreeBSD' ]; then
 # tell which Red Hat variant it is
 elif [ -f "/etc/redhat-release" ]; then
 
-    RHV=$(egrep -o 'Fedora|CentOS|Red.Hat' /etc/redhat-release)
+    RHV=$(egrep -o 'Fedora|CentOS|Red.Hat|Scientific' /etc/redhat-release)
     case $RHV in
         Fedora) OS='fedora';;
         CentOS) OS='centos';;
         Red.Hat) OS='redhat';;
+        Scientific) OS='scientific-linux';;
     esac
 
 # Check for debian_version
