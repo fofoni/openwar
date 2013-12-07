@@ -213,7 +213,17 @@ void draw_army(const Color::color c) {
     }
     glEnd();
 
-    // TODO: bottom and top caps; inner wall
+    // TODO: bottom and top caps; inner walls
+
+    // draw inner lower wall
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+//         glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+//         glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], ARMY_HEIGHT);
+//         glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+//         glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+    }
+    glEnd();
 
     // draw outer wall
     glBegin(GL_TRIANGLE_STRIP);
