@@ -100,17 +100,18 @@ const double TAU = 6.283185307179586477; // tau is 2*pi
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
 const int WORLD_LONG_QTD = 100;
 
-const int ARMY_LONG_QTD = 6;
-const float ARMY_HEIGHT = .2;
-const float ARMY_RAD = .4;
-const float ARMY_IN_PERC = 0.80;
-const float ARMY_HOLE_PERC = 0.20;
-const float ARMY_BIG_PERC = 1.2;
-static const float ARMY_HS[] = {
+const int ARMY_LONG_QTD = 50; // num of sides of poligon quantizing the circle
+const float ARMY_HEIGHT = .0135; // height of outer cilinder
+const float ARMY_RAD = .025; // radius of outer colinder
+const float ARMY_IN_PERC = 0.80; // ratio between the inner and outer radii
+const float ARMY_HOLE_PERC = 0.20; // height of hole over height of cilinder
+const float ARMY_BIG_PERC = 1.2; // ratio between big and common armies
+const float ARMY_GHOST_PERC = 1.05;
+static const float ARMY_HS[] = { // heights
     ARMY_HEIGHT * ARMY_HOLE_PERC,
     ARMY_HEIGHT * (1-ARMY_HOLE_PERC)
 };
-static const float ARMY_HS_BIG[] = {
+static const float ARMY_HS_BIG[] = { // big heights
     ARMY_HEIGHT * ARMY_HOLE_PERC * ARMY_BIG_PERC,
     ARMY_HEIGHT * (1-ARMY_HOLE_PERC) * ARMY_BIG_PERC
 };
@@ -174,7 +175,7 @@ void init_render() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE);
-//     glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
     world_tex_map = loadpng("imgs/earth_tex.png", wtm_width, wtm_height);
@@ -194,10 +195,15 @@ void handle_resize(int w, int h) {
     );
 }
 
-void draw_army(const Color::color c) {
+// TODO: material
+void draw_army(const Color::color c, int country_id,
+               int qtd=1, bool big=false) {
 
     glPushMatrix();
+    glRotatef(90-180*graph[country_id].y, 1, 0, 0);
+    glRotatef(360*graph[country_id].x-180, 0, 1, 0);
     glTranslatef(0, 0, 1);
+    if (big) glScalef(ARMY_BIG_PERC, ARMY_BIG_PERC, ARMY_BIG_PERC);
 
     glColor3f(c[0], c[1], c[2]);
 
@@ -205,23 +211,29 @@ void draw_army(const Color::color c) {
     glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0, 0, -1);
     glVertex3f(0, 0, ARMY_HS[0]);
-    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
-        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
-        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
-        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+    for (int i = ARMY_LONG_QTD; i >= 0; i--) {
+        glNormal3f(0, 0, -1);
         glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
     }
     glEnd();
 
-    // TODO: bottom and top caps; inner walls
-
-    // draw inner lower wall
+    // draw lower wall
     glBegin(GL_TRIANGLE_STRIP);
     for (int i = 0; i <= ARMY_LONG_QTD; i++) {
-//         glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
-//         glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], ARMY_HEIGHT);
-//         glNormal3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
-//         glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+        glNormal3f(-army_vertices[i][1][0], -army_vertices[i][1][1], 0);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], 0);
+        glNormal3f(-army_vertices[i][1][0], -army_vertices[i][1][1], 0);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[0]);
+    }
+    glEnd();
+
+    // draw bottom cap
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(0, 0, -1);
+        glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], 0);
+        glNormal3f(0, 0, -1);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], 0);
     }
     glEnd();
 
@@ -235,14 +247,32 @@ void draw_army(const Color::color c) {
     }
     glEnd();
 
+    // draw top cap
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(0, 0, 1);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HEIGHT);
+        glNormal3f(0, 0, 1);
+        glVertex3f(army_vertices[i][0][0], army_vertices[i][0][1], ARMY_HEIGHT);
+    }
+    glEnd();
+
+    // draw upper wall
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= ARMY_LONG_QTD; i++) {
+        glNormal3f(-army_vertices[i][1][0], -army_vertices[i][1][1], 0);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+        glNormal3f(-army_vertices[i][1][0], -army_vertices[i][1][1], 0);
+        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HEIGHT);
+    }
+    glEnd();
+
     // draw upper cap
     glBegin(GL_TRIANGLE_FAN);
     glNormal3f(0, 0, 1);
     glVertex3f(0, 0, ARMY_HS[1]);
     for (int i = 0; i <= ARMY_LONG_QTD; i++) {
-        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
-        glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
-        glNormal3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
+        glNormal3f(0, 0, 1);
         glVertex3f(army_vertices[i][1][0], army_vertices[i][1][1], ARMY_HS[1]);
     }
     glEnd();
@@ -303,7 +333,7 @@ void draw_scene() {
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
-    draw_army(Color::yellow);
+    draw_army(Color::dark_cyan, 0);
 
     glutSwapBuffers();
 
