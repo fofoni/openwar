@@ -15,11 +15,23 @@ CFLAGS = -Wall -Wextra -pedantic -O2 -march=native \
 PROG = openwar
 SRCS = main.cpp loadpng.cpp
 LIBS = -lglut -lGLU -lpng
-ifeq ($(OS),fedora)
+ifeq ($(shell [[ $(OS) == fedora || $(OS) == redhat ]] && echo true ),true)
     LIBS += -lGL
 endif
 HEADS = loadpng.h
 SCRIPTS = get-git-version.sh os_test.sh
+
+define SCILIN_TEXT
+Scientific Linux doens't currently support xcftools. Please run `make $(PROG)'
+    instead of just `make' in order to avoid errors.
+
+endef
+ifeq ($(OS),scientific-linux)
+    SCILIN_WARN=$(warning $(SCILIN_TEXT))
+else
+    SCILIN_WARN=
+endif
+
 
 TEXTURE_MAIN = imgs/earth_tex.png
 XCF_MAIN = imgs/earth_map.xcf
@@ -32,11 +44,13 @@ $(PROG) : $(SRCS) $(HEADS) $(SCRIPTS)
 	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 $(TEXTURE_MAIN) : $(XCF_MAIN)
+	$(SCILIN_WARN)
 	xcf2png $(XCF_MAIN) -o temp.png
 	convert temp.png -resize "1024x1024!" $(TEXTURE_MAIN)
 	rm -f temp.png
 
 $(TEXTURE_GRAPH) : $(XCF_GRAPH)
+	$(SCILIN_WARN)
 	xcf2png $(XCF_GRAPH) -o temp.png
 	convert temp.png -resize "1024x1024!" $(TEXTURE_GRAPH)
 	rm -f temp.png
