@@ -15,10 +15,13 @@ CFLAGS = -Wall -Wextra -pedantic -O2 -march=native \
 PROG = openwar
 SRCS = main.cpp loadpng.cpp
 LIBS = -lglut -lGLU -lpng
-ifeq ($(shell [[ $(OS) == fedora || $(OS) == redhat ]] && echo true ),true)
+ifeq ($(OS),fedora)
     LIBS += -lGL
 endif
-HEADS = loadpng.h
+ifeq ($(OS),redhat)
+    LIBS += -lGL
+endif
+HEADS = loadpng.h main.h
 SCRIPTS = get-git-version.sh os_test.sh
 
 define SCILIN_TEXT

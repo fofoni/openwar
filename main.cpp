@@ -40,6 +40,12 @@
 
 #include "loadpng.h"
 
+/***********************************
+************** main.h **************
+***********************************/
+
+#include "main.h"
+
 /****************************************
 ************** definitions **************
 ****************************************/
@@ -53,20 +59,11 @@
 # define OpenWAR_VERSION_STR "v???"
 #endif
 
-class Terr {
-public:
-    float x, y;
-    Terr(float x, float y) : x(x), y(y) {}
-    ~Terr() {}
-    std::vector<int> frontiers;
-};
-
 namespace Key {
     static const unsigned char ESC = 27;
 }
 
 namespace Color {
-    typedef float color[3];
     static const color black = {0, 0, 0};
     static const color dark_blue = {0, 0, .5};
     static const color blue = {0, 0, 1};
@@ -106,7 +103,7 @@ const float ARMY_RAD = .025; // radius of outer colinder
 const float ARMY_IN_PERC = 0.80; // ratio between the inner and outer radii
 const float ARMY_HOLE_PERC = 0.20; // height of hole over height of cilinder
 const float ARMY_BIG_PERC = 1.2; // ratio between big and common armies
-const float ARMY_GHOST_PERC = 1.05;
+const float ARMY_GHOST_PERC = 1.1;
 static const float ARMY_HS[] = { // heights
     ARMY_HEIGHT * ARMY_HOLE_PERC,
     ARMY_HEIGHT * (1-ARMY_HOLE_PERC)
@@ -134,6 +131,7 @@ float sph_vertices[WORLD_LONG_QTD+1][WORLD_LAT_QTD+1][3];
 float army_vertices[ARMY_LONG_QTD+1][2][2];
 
 std::vector<Terr> graph;
+std::vector<int> armies;
 
 /*************************************************
 ************** GLUT and GL routines **************
@@ -162,6 +160,10 @@ void handle_keypress(unsigned char key, int x, int y) {
                 world_curr_tex = world_tex_graph;
             else
                 world_curr_tex = world_tex_map;
+            break;
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            // graph[key-'0'].qtd++;
             break;
     }
     glutPostRedisplay();
@@ -196,14 +198,15 @@ void handle_resize(int w, int h) {
 }
 
 // TODO: material
-void draw_army(const Color::color c, int country_id,
-               int qtd=1, bool big=false) {
+void draw_single_army(const Color::color c, float x, float y,
+                      float h, bool big) {
 
     glPushMatrix();
-    glRotatef(90-180*graph[country_id].y, 1, 0, 0);
-    glRotatef(360*graph[country_id].x-180, 0, 1, 0);
+    glRotatef(x, 0, 1, 0);
+    glRotatef(-y, 1, 0, 0);
     glTranslatef(0, 0, 1);
     if (big) glScalef(ARMY_BIG_PERC, ARMY_BIG_PERC, ARMY_BIG_PERC);
+    glTranslatef(0, 0, h*ARMY_HEIGHT*ARMY_GHOST_PERC);
 
     glColor3f(c[0], c[1], c[2]);
 
@@ -333,7 +336,10 @@ void draw_scene() {
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
-    draw_army(Color::dark_cyan, 0);
+    for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
+        draw_single_army(Color::dark_cyan, it->x, it->y);
+    }
+    draw_single_army(Color::dark_cyan, graph[0].x, graph[0].y, 1, true);
 
     glutSwapBuffers();
 
@@ -389,7 +395,7 @@ int main(int argc, char** argv) {
             ss >> word;
             names[word] = count;
             ss >> x >> y;
-            graph.push_back(Terr(x/1024, 1-y/512));
+            graph.push_back(Terr(360*(x/1024-.5), 180*(.5-y/512)));
         }
         file.clear(); file.seekg(0, file.beg); // for reading it again
         for (int count=0; getline(file, line); count++) {
