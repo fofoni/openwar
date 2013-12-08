@@ -94,6 +94,9 @@ namespace Color {
 }
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
+
+const int CAMERA_DISTANCE = 3; // distance from cam to center of the earth
+
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
 const int WORLD_LONG_QTD = 100;
 
@@ -209,13 +212,46 @@ void init_render() {
 
 }
 
+void handle_mouse(int button, int state, int alpha, int beta) {
+
+    const float *army_color;
+    switch (button) {
+        case GLUT_LEFT_BUTTON:
+            army_color = Color::dark_magenta;
+            break;
+        case GLUT_RIGHT_BUTTON:
+            army_color = Color::black;
+            break;
+    }
+    cout << button << " " << state << " " << alpha << " " << beta << endl;
+
+    // sine and cosine of phi, the angle between the clicking direction
+    // and the eye direction.
+    double cosp, tanp; {
+        double a = double(alpha - .5*window_w)/double(window_h);
+        double b = double(beta)/double(window_h) - .5;
+        // zoom is theta in degrees; tan(phi) = 2*tan(theta/2)*norm((a,b))
+        tanp = 2 * tan(zoom*TAU/720) * sqrt(a*a + b*b);
+        cosp = 1/sqrt(1+tanp*tanp);
+    }
+    double cos2p = cosp*cosp;
+    double tan2p = tanp*tanp;
+    double discriminant = 1/cos2p - tan2p*CAMERA_DISTANCE*CAMERA_DISTANCE;
+
+    // z of intersection (with the origin at center of the earth)
+    float z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
+
+    cout << endl;
+
+}
+
 void handle_resize(int w, int h) {
     window_w = w; window_h = h;
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(
-        zoom,                  // camera angle
+        zoom,                  // camera angle (vertical direction)
         double(w) / double(h), // width-to-height ratio
         .5, 200                // near and far z clipping coordinates
     );
@@ -381,7 +417,7 @@ void draw_scene() {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos0);
 
-    glTranslatef(0, 0, -3);
+    glTranslatef(0, 0, -CAMERA_DISTANCE);
     glRotatef(latitude, 1, 0, 0);
     glRotatef(longitude, 0, 1, 0);
 
@@ -509,6 +545,7 @@ int main(int argc, char** argv) {
 
     glutDisplayFunc(draw_scene);
     glutKeyboardFunc(handle_keypress);
+    glutMouseFunc(handle_mouse);
     glutReshapeFunc(handle_resize);
 
     // try {
