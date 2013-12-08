@@ -150,16 +150,16 @@ void handle_keypress(unsigned char key, int x, int y) {
         case Key::ESC:
             /*throw escape*/; break;
         case 'a':
-            longitude -= -10; // TODO: make this number depend on the zoom level
+            longitude -= -zoom/5; // TODO: make this number depend on the zoom level
             break;
         case 'd':
-            longitude += -10;
+            longitude += -zoom/5;
             break;
         case 's':
-            latitude -= 10;
+            latitude -= zoom/5;
             break;
         case 'w':
-            latitude += 10;
+            latitude += zoom/5;
             break;
         case 'v':
             if (world_curr_tex == world_tex_map)
@@ -180,6 +180,13 @@ void handle_keypress(unsigned char key, int x, int y) {
             break;
         case 'l':
             if (darkening <= 9) darkening += 1;
+            break;
+        case 'h':
+            longitude = latitude = 0;
+            darkening = 10;
+            zoom = 50;
+            world_curr_tex = world_tex_map;
+            handle_resize(window_w, window_h);
             break;
     }
     glutPostRedisplay();
@@ -306,34 +313,55 @@ void draw_single_army(const Color::color c, float x, float y,
 }
 
 void draw_armies(const Terr& terr, int qtd) {
-    switch (qtd) {
-        case 1:
-            draw_single_army(terr.p->c, terr.x, terr.y);
-            break;
-        case 2:
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, -1.5, 0);
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,  1.5, 0);
-            break;
-        case 4:
-            draw_single_army(terr.p->c, terr.x, terr.y, 1, false);
-            // fall through
-        case 3:
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, -1.5, -1.27);
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,  1.5, -1.27);
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,    0,  1.27);
-        case 5:
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, true);
-            break;
-        case 6:
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, true, -1.7, 0);
-            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, 1.7, 0);
-            break;
-        case 7:
-        case 8:
-        case 9:
-        default:
-        // ?
-    }
+    int q = qtd/5, r = qtd % 5;
+    const float *c = terr.p->c;
+    const float& x = terr.x;
+    const float& y = terr.y;
+    if (q == 0)
+        switch (r) {
+            case 1:
+                draw_single_army(c,x,y);
+                break;
+            case 2:
+                draw_single_army(c,x,y, 0, false, -1.5, 0);
+                draw_single_army(c,x,y, 0, false,  1.5, 0);
+                break;
+            case 4:
+                draw_single_army(c,x,y, 1, false);
+                // fall through
+            case 3:
+                draw_single_army(c,x,y, 0, false, -1.5, -1.27);
+                draw_single_army(c,x,y, 0, false,  1.5, -1.27);
+                draw_single_army(c,x,y, 0, false,    0,  1.27);
+        }
+    else
+        switch (r) {
+            case 0:
+                for (int i = 0; i < q; i++)
+                    draw_single_army(c,x,y, i, true);
+                break;
+            case 1:
+                for (int i = 0; i < q; i++)
+                    draw_single_army(c,x,y, i, true, -1.7, 0);
+                draw_single_army(c,x,y, 0, false, 1.7, 0);
+                break;
+            case 2:
+                for (int i = 0; i < q; i++)
+                    draw_single_army(c,x,y, i, true, -1.55, 0);
+                draw_single_army(c,x,y, 0, false, 1.55, -1.5);
+                draw_single_army(c,x,y, 0, false, 1.55,  1.5);
+                break;
+            case 4:
+                draw_single_army(c,x,y, 1, false,  .85, 0);
+                /* fall through */
+            case 3:
+                for (int i = 0; i < q; i++)
+                    draw_single_army(c,x,y, i, true,  -3.1, 0);
+                draw_single_army(c,x,y, 0, false,    0, -1.5);
+                draw_single_army(c,x,y, 0, false,    0,  1.5);
+                draw_single_army(c,x,y, 0, false, 2.54, 0);
+                break;
+        }
 }
 
 void draw_scene() {
@@ -389,7 +417,7 @@ void draw_scene() {
 
     // draw armies
     for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
-        draw_armies(*it, 6);
+        draw_armies(*it, 49);
     }
 
     glutSwapBuffers();
