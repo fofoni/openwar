@@ -100,9 +100,9 @@ const int WORLD_LONG_QTD = 100;
 const int ARMY_LONG_QTD = 50; // num of sides of poligon quantizing the circle
 const float ARMY_HEIGHT = .0135; // height of outer cilinder
 const float ARMY_RAD = .025; // radius of outer colinder
-const float ARMY_IN_PERC = 0.80; // ratio between the inner and outer radii
-const float ARMY_HOLE_PERC = 0.20; // height of hole over height of cilinder
-const float ARMY_BIG_PERC = 1.2; // ratio between big and common armies
+const float ARMY_IN_PERC = 0.70; // ratio between the inner and outer radii
+const float ARMY_HOLE_PERC = 0.30; // height of hole over height of cilinder
+const float ARMY_BIG_PERC = 1.25; // ratio between big and common armies
 const float ARMY_GHOST_PERC = 1.1;
 static const float ARMY_HS[] = { // heights
     ARMY_HEIGHT * ARMY_HOLE_PERC,
@@ -121,7 +121,12 @@ const double ARMY_LONG_EPS = TAU/double(ARMY_LONG_QTD);
 ************** global vars **************
 ****************************************/
 
-int latitude = 0, longitude = 0;
+int window_w, window_h; // glut window size
+
+// viewing
+int latitude = 0, longitude = 0; // coordinates of center of vision
+int zoom = 50; // camera angle in degrees
+int darkening = 10; // 0 is completely dark, 10 is normal.
 
 GLuint world_tex_map, world_tex_graph, world_curr_tex;
 int wtm_width = 1024, wtm_height = 1024,
@@ -130,8 +135,9 @@ int wtm_width = 1024, wtm_height = 1024,
 float sph_vertices[WORLD_LONG_QTD+1][WORLD_LAT_QTD+1][3];
 float army_vertices[ARMY_LONG_QTD+1][2][2];
 
-std::vector<Terr> graph;
-std::vector<int> armies;
+std::vector<Terr> graph; // "map"
+
+std::vector<Player> players;
 
 /*************************************************
 ************** GLUT and GL routines **************
@@ -161,9 +167,19 @@ void handle_keypress(unsigned char key, int x, int y) {
             else
                 world_curr_tex = world_tex_map;
             break;
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            // graph[key-'0'].qtd++;
+        case 'z':
+            if (zoom >= 10) zoom -= 5;
+            handle_resize(window_w, window_h);
+            break;
+        case 'x':
+            if (zoom <= 170) zoom += 5;
+            handle_resize(window_w, window_h);
+            break;
+        case 'k':
+            if (darkening >= 1) darkening -= 1;
+            break;
+        case 'l':
+            if (darkening <= 9) darkening += 1;
             break;
     }
     glutPostRedisplay();
@@ -187,11 +203,12 @@ void init_render() {
 }
 
 void handle_resize(int w, int h) {
+    window_w = w; window_h = h;
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(
-        50,                    // camera angle // TODO: get this back at 45?
+        zoom,                  // camera angle
         double(w) / double(h), // width-to-height ratio
         .5, 200                // near and far z clipping coordinates
     );
@@ -199,11 +216,13 @@ void handle_resize(int w, int h) {
 
 // TODO: material
 void draw_single_army(const Color::color c, float x, float y,
-                      float h, bool big) {
+                      float h, bool big, float dx, float dy) {
 
     glPushMatrix();
     glRotatef(x, 0, 1, 0);
     glRotatef(-y, 1, 0, 0);
+    glRotatef(dx, 0, 1, 0);
+    glRotatef(-dy, 1, 0, 0);
     glTranslatef(0, 0, 1);
     if (big) glScalef(ARMY_BIG_PERC, ARMY_BIG_PERC, ARMY_BIG_PERC);
     glTranslatef(0, 0, h*ARMY_HEIGHT*ARMY_GHOST_PERC);
@@ -286,6 +305,37 @@ void draw_single_army(const Color::color c, float x, float y,
 
 }
 
+void draw_armies(const Terr& terr, int qtd) {
+    switch (qtd) {
+        case 1:
+            draw_single_army(terr.p->c, terr.x, terr.y);
+            break;
+        case 2:
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, -1.5, 0);
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,  1.5, 0);
+            break;
+        case 4:
+            draw_single_army(terr.p->c, terr.x, terr.y, 1, false);
+            // fall through
+        case 3:
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, -1.5, -1.27);
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,  1.5, -1.27);
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false,    0,  1.27);
+        case 5:
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, true);
+            break;
+        case 6:
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, true, -1.7, 0);
+            draw_single_army(terr.p->c, terr.x, terr.y, 0, false, 1.7, 0);
+            break;
+        case 7:
+        case 8:
+        case 9:
+        default:
+        // ?
+    }
+}
+
 void draw_scene() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -310,6 +360,7 @@ void draw_scene() {
     // draw sphere representing earth
     glPushMatrix();
     glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, world_curr_tex);
+    glColor3f(darkening/10., darkening/10., darkening/10.);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     for (int j = 1; j <= WORLD_LAT_QTD; j++) {
@@ -336,10 +387,10 @@ void draw_scene() {
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
+    // draw armies
     for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
-        draw_single_army(Color::dark_cyan, it->x, it->y);
+        draw_armies(*it, 6);
     }
-    draw_single_army(Color::dark_cyan, graph[0].x, graph[0].y, 1, true);
 
     glutSwapBuffers();
 
@@ -375,6 +426,14 @@ int main(int argc, char** argv) {
         army_vertices[i][1][1] = ARMY_RAD * sin(i*ARMY_LONG_EPS) * ARMY_IN_PERC;
     }
 
+    // TODO: Qt GUI
+    players.push_back(Player(string("p0"), Color::dark_cyan));
+    players.push_back(Player(string("p1"), Color::dark_magenta));
+    players.push_back(Player(string("p2"), Color::dark_yellow));
+    players.push_back(Player(string("p3"), Color::dark_red));
+    players.push_back(Player(string("p4"), Color::dark_green));
+    players.push_back(Player(string("p5"), Color::dark_blue));
+
     // load territories data
     cout << "Loading territories and frontiers data...";
     {
@@ -396,6 +455,7 @@ int main(int argc, char** argv) {
             names[word] = count;
             ss >> x >> y;
             graph.push_back(Terr(360*(x/1024-.5), 180*(.5-y/512)));
+            graph[count].p = &(players[0]); // TODO: Qt GUI
         }
         file.clear(); file.seekg(0, file.beg); // for reading it again
         for (int count=0; getline(file, line); count++) {
