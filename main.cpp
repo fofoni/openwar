@@ -142,6 +142,11 @@ std::vector<Terr> graph; // "map"
 
 std::vector<Player> players;
 
+// TEMP:
+float nomade_x = 0;
+float nomade_y = 0;
+const float *nomade_c = Color::black;
+
 /*************************************************
 ************** GLUT and GL routines **************
 *************************************************/
@@ -220,27 +225,50 @@ void handle_mouse(int button, int state, int alpha, int beta) {
             army_color = Color::dark_magenta;
             break;
         case GLUT_RIGHT_BUTTON:
-            army_color = Color::black;
+            army_color = Color::dark_yellow;
             break;
     }
     cout << button << " " << state << " " << alpha << " " << beta << endl;
 
-    // sine and cosine of phi, the angle between the clicking direction
+    double a = double(alpha - .5*window_w)/double(window_h);
+    double b = .5 - double(beta)/double(window_h);
+    // norm squared of (a,b)
+    double norm2_ab = a*a + b*b;
+    // tangent and cosine of phi, the angle between the clicking direction
     // and the eye direction.
-    double cosp, tanp; {
-        double a = double(alpha - .5*window_w)/double(window_h);
-        double b = double(beta)/double(window_h) - .5;
-        // zoom is theta in degrees; tan(phi) = 2*tan(theta/2)*norm((a,b))
-        tanp = 2 * tan(zoom*TAU/720) * sqrt(a*a + b*b);
-        cosp = 1/sqrt(1+tanp*tanp);
-    }
-    double cos2p = cosp*cosp;
+    // zoom is theta in degrees; tan(phi) = 2*tan(theta/2)*norm((a,b))
+    double tanp = 2 * tan(zoom*TAU/720) * sqrt(norm2_ab); // TODO: UNNEEDED!
     double tan2p = tanp*tanp;
+    double cosp = 1/sqrt(1+tan2p); // TODO: UNNEEDED!
+    double cos2p = 1/(1+tan2p);
     double discriminant = 1/cos2p - tan2p*CAMERA_DISTANCE*CAMERA_DISTANCE;
+    cout << discriminant << endl;
 
-    // z of intersection (with the origin at center of the earth)
-    float z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
+    // point of intersection (with the origin at center of the earth)
+    double z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
+    double lambda = sqrt((1-z0*z0)/norm2_ab);
+    double x0 = lambda * a;
+    double y0 = lambda * b;
+    cout << x0 << "  ;  " << y0 << "  ;  " << z0 << endl;
 
+    double x0_, y0_, z0_;
+    double cla=cos(latitude*TAU/360),  sla=(latitude*TAU/360),
+           clo=cos(longitude*TAU/360), slo=sin(longitude*TAU/360);
+
+    x0_ =   x0;
+    y0_ =   cla*y0  + sla*z0;
+    z0_ = - sla*y0  + cla*z0;
+
+    y0  =   y0_; //- latitude*TAU/360; // TODO: ????????
+    z0  =   clo*z0_ + slo*x0_;
+    x0  = - slo*z0_ + clo*x0_;
+
+    nomade_c = army_color;
+    nomade_y = 360/TAU*asin(y0);
+    nomade_x = 360/TAU*atan2(x0,z0);
+    glutPostRedisplay();
+    cout << x0 << "  ;  " << y0 << "  ;  " << z0 << endl;
+    cout << longitude << " " << latitude << endl;
     cout << endl;
 
 }
@@ -455,6 +483,9 @@ void draw_scene() {
     for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
         draw_armies(*it, 49);
     }
+
+    // TEMP:
+    draw_single_army(nomade_c, nomade_x, nomade_y);
 
     glutSwapBuffers();
 
