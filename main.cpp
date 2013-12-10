@@ -252,14 +252,14 @@ void handle_mouse(int button, int state, int alpha, int beta) {
     cout << x0 << "  ;  " << y0 << "  ;  " << z0 << endl;
 
     double x0_, y0_, z0_;
-    double cla=cos(latitude*TAU/360),  sla=(latitude*TAU/360),
+    double cla=cos(latitude*TAU/360),  sla=sin(latitude*TAU/360),
            clo=cos(longitude*TAU/360), slo=sin(longitude*TAU/360);
 
     x0_ =   x0;
     y0_ =   cla*y0  + sla*z0;
     z0_ = - sla*y0  + cla*z0;
 
-    y0  =   y0_; //- latitude*TAU/360; // TODO: ????????
+    y0  =   y0_;
     z0  =   clo*z0_ + slo*x0_;
     x0  = - slo*z0_ + clo*x0_;
 
