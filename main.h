@@ -14,6 +14,8 @@ namespace Color {
     typedef float color[3];
 }
 
+const double TAU = 6.283185307179586477; // tau is 2*pi
+
 class Player {
 public:
 
@@ -31,12 +33,21 @@ public:
 
     // longitude and latitude in degrees. East and North are positive
     float x, y;
+    // three-vector from the center of the earth
+    double x0, y0, z0;
     std::vector<int> frontiers;
+    std::string name;
 
     int armies;
     Player *p;
 
-    Terr(float x, float y) : x(x), y(y), armies(1) {}
+    Terr(float x, float y, const std::string& n) :
+        x(x), y(y), name(n), armies(1), p(NULL)
+    {
+        y0 = sin(y*TAU/360);
+        z0 = cos(x*TAU/360) * cos(y*TAU/360);
+        x0 = sin(x*TAU/360) * cos(y*TAU/360);
+    }
     ~Terr() {}
 
 };
@@ -46,6 +57,9 @@ void init_render();
 void handle_keypress(unsigned char key, int x, int y);
 void handle_mouse(int button, int state, int x, int y);
 void handle_resize(int w, int h);
+
+void get_click_vec(int alpha, int beta, double &x, double &y, double &z);
+// Terr *get_click_terr(int alpha, int beta);
 
 void draw_scene();
 void draw_single_army(const Color::color c, float x, float y,

@@ -93,8 +93,6 @@ namespace Color {
     static const color white = {1, 1, 1};
 }
 
-const double TAU = 6.283185307179586477; // tau is 2*pi
-
 const int CAMERA_DISTANCE = 3; // distance from cam to center of the earth
 
 const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
@@ -217,18 +215,7 @@ void init_render() {
 
 }
 
-void handle_mouse(int button, int state, int alpha, int beta) {
-
-    const float *army_color;
-    switch (button) {
-        case GLUT_LEFT_BUTTON:
-            army_color = Color::dark_magenta;
-            break;
-        case GLUT_RIGHT_BUTTON:
-            army_color = Color::dark_yellow;
-            break;
-    }
-    cout << button << " " << state << " " << alpha << " " << beta << endl;
+void get_click_vec(int alpha, int beta, double &x0, double &y0, double &z0) {
 
     double a = double(alpha - .5*window_w)/double(window_h);
     double b = .5 - double(beta)/double(window_h);
@@ -237,19 +224,15 @@ void handle_mouse(int button, int state, int alpha, int beta) {
     // tangent and cosine of phi, the angle between the clicking direction
     // and the eye direction.
     // zoom is theta in degrees; tan(phi) = 2*tan(theta/2)*norm((a,b))
-    double tanp = 2 * tan(zoom*TAU/720) * sqrt(norm2_ab); // TODO: UNNEEDED!
-    double tan2p = tanp*tanp;
-    double cosp = 1/sqrt(1+tan2p); // TODO: UNNEEDED!
+    double tan2p = 4 * tan(zoom*TAU/720)*tan(zoom*TAU/720) * norm2_ab;
     double cos2p = 1/(1+tan2p);
     double discriminant = 1/cos2p - tan2p*CAMERA_DISTANCE*CAMERA_DISTANCE;
-    cout << discriminant << endl;
 
     // point of intersection (with the origin at center of the earth)
-    double z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
-    double lambda = sqrt((1-z0*z0)/norm2_ab);
-    double x0 = lambda * a;
-    double y0 = lambda * b;
-    cout << x0 << "  ;  " << y0 << "  ;  " << z0 << endl;
+    z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
+    double lambda = (norm2_ab != 0) ? sqrt((1-z0*z0)/norm2_ab) : 0;
+    x0 = lambda * a;
+    y0 = lambda * b;
 
     double x0_, y0_, z0_;
     double cla=cos(latitude*TAU/360),  sla=sin(latitude*TAU/360),
@@ -263,13 +246,43 @@ void handle_mouse(int button, int state, int alpha, int beta) {
     z0  =   clo*z0_ + slo*x0_;
     x0  = - slo*z0_ + clo*x0_;
 
+}
+
+void handle_mouse(int button, int state, int alpha, int beta) {
+
+    const float *army_color;
+    switch (button) {
+        case GLUT_LEFT_BUTTON:
+            army_color = Color::dark_magenta;
+            break;
+        case GLUT_RIGHT_BUTTON:
+            army_color = Color::dark_yellow;
+            break;
+        default:
+            army_color = Color::white;
+            break;
+    }
+
+    double x0, y0, z0;
+    get_click_vec(alpha, beta, x0, y0, z0);
+
     nomade_c = army_color;
     nomade_y = 360/TAU*asin(y0);
     nomade_x = 360/TAU*atan2(x0,z0);
     glutPostRedisplay();
-    cout << x0 << "  ;  " << y0 << "  ;  " << z0 << endl;
-    cout << longitude << " " << latitude << endl;
-    cout << endl;
+
+    // TODO: wrap in get_click_terr
+    double closer_dist = 2; vector<Terr>::iterator pointer;
+    for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
+        double curr_dist = (x0 - it->x0)*(x0 - it->x0) + // TODO: produto interno ao inves de distancia?
+                           (y0 - it->y0)*(y0 - it->y0) +
+                           (z0 - it->z0)*(z0 - it->z0);
+        if (curr_dist < closer_dist) {
+            closer_dist = curr_dist;
+            pointer = it;
+        }
+    }
+    cout << pointer->name << " " << closer_dist << endl;
 
 }
 
@@ -549,7 +562,7 @@ int main(int argc, char** argv) {
             ss >> word;
             names[word] = count;
             ss >> x >> y;
-            graph.push_back(Terr(360*(x/1024-.5), 180*(.5-y/512)));
+            graph.push_back(Terr(360*(x/1024-.5), 180*(.5-y/512), word));
             graph[count].p = &(players[0]); // TODO: Qt GUI
         }
         file.clear(); file.seekg(0, file.beg); // for reading it again
