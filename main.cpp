@@ -209,6 +209,7 @@ void init_render() {
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
+    // TODO: make new visualization with voronoi (and no texture)
     world_tex_map = loadpng("imgs/earth_tex.png", wtm_width, wtm_height);
     world_tex_graph = loadpng("imgs/earth_graph.png", wtg_width, wtg_height);
     world_curr_tex = world_tex_map;

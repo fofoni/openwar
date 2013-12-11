@@ -32,11 +32,11 @@ class Terr {
 public:
 
     // longitude and latitude in degrees. East and North are positive
-    float x, y;
+    float x, y; // TODO: should be const?
     // three-vector from the center of the earth
     double x0, y0, z0;
     std::vector<int> frontiers;
-    std::string name;
+    std::string name; // TODO: should be const?
 
     int armies;
     Player *p;
