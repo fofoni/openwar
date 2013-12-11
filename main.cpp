@@ -20,6 +20,9 @@
 #include <vector>
 #include <map>
 
+#include <exception>
+#include <stdexcept>
+
 /******************************************
 ************** math includes **************
 ******************************************/
@@ -95,7 +98,7 @@ namespace Color {
 
 const int CAMERA_DISTANCE = 3; // distance from cam to center of the earth
 
-const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime
+const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime (when we get Qt)
 const int WORLD_LONG_QTD = 100;
 
 const int ARMY_LONG_QTD = 50; // num of sides of poligon quantizing the circle
@@ -156,7 +159,7 @@ void handle_keypress(unsigned char key, int x, int y) {
         case Key::ESC:
             /*throw escape*/; break;
         case 'a':
-            longitude -= -zoom/5; // TODO: make this number depend on the zoom level
+            longitude -= -zoom/5;
             break;
         case 'd':
             longitude += -zoom/5;
@@ -209,14 +212,13 @@ void init_render() {
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_SMOOTH);
 
-    // TODO: make new visualization with voronoi (and no texture)
     world_tex_map = loadpng("imgs/earth_tex.png", wtm_width, wtm_height);
     world_tex_graph = loadpng("imgs/earth_graph.png", wtg_width, wtg_height);
     world_curr_tex = world_tex_map;
 
 }
 
-void get_click_vec(int alpha, int beta, double &x0, double &y0, double &z0) {
+void get_click_vec(const int alpha, const int beta, double &x0, double &y0, double &z0) {
 
     double a = double(alpha - .5*window_w)/double(window_h);
     double b = .5 - double(beta)/double(window_h);
@@ -228,6 +230,8 @@ void get_click_vec(int alpha, int beta, double &x0, double &y0, double &z0) {
     double tan2p = 4 * tan(zoom*TAU/720)*tan(zoom*TAU/720) * norm2_ab;
     double cos2p = 1/(1+tan2p);
     double discriminant = 1/cos2p - tan2p*CAMERA_DISTANCE*CAMERA_DISTANCE;
+
+    if (discriminant < 0) throw clicked_outside;
 
     // point of intersection (with the origin at center of the earth)
     z0 = cos2p*(CAMERA_DISTANCE*tan2p + sqrt(discriminant));
@@ -249,41 +253,28 @@ void get_click_vec(int alpha, int beta, double &x0, double &y0, double &z0) {
 
 }
 
-void handle_mouse(int button, int state, int alpha, int beta) {
-
-    const float *army_color;
-    switch (button) {
-        case GLUT_LEFT_BUTTON:
-            army_color = Color::dark_magenta;
-            break;
-        case GLUT_RIGHT_BUTTON:
-            army_color = Color::dark_yellow;
-            break;
-        default:
-            army_color = Color::white;
-            break;
-    }
-
+vector<Terr>::iterator get_click_terr(int alpha, int beta) {
     double x0, y0, z0;
     get_click_vec(alpha, beta, x0, y0, z0);
-
-    nomade_c = army_color;
-    nomade_y = 360/TAU*asin(y0);
-    nomade_x = 360/TAU*atan2(x0,z0);
-    glutPostRedisplay();
-
-    // TODO: wrap in get_click_terr
-    double closer_dist = 2; vector<Terr>::iterator pointer;
+    double closer_prod = -1; vector<Terr>::iterator pointer;
     for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
-        double curr_dist = (x0 - it->x0)*(x0 - it->x0) + // TODO: produto interno ao inves de distancia?
-                           (y0 - it->y0)*(y0 - it->y0) +
-                           (z0 - it->z0)*(z0 - it->z0);
-        if (curr_dist < closer_dist) {
-            closer_dist = curr_dist;
+        double curr_prod = x0*it->x0 + y0*it->y0 + z0*it->z0;
+        if (curr_prod > closer_prod) {
+            closer_prod = curr_prod;
             pointer = it;
         }
     }
-    cout << pointer->name << " " << closer_dist << endl;
+    return pointer;
+}
+
+void handle_mouse(int button, int state, int alpha, int beta) {
+
+    // state = GLUT_UP (release) ou GLUT_DOWN (press)
+    // button = GLUT_LEFT_BUTTON ou GLUT_RIGHT_BUTTON
+
+    if ((state == GLUT_DOWN) || (button != GLUT_LEFT_BUTTON)) return;
+
+    cout << get_click_terr(alpha, beta)->name << endl;
 
 }
 

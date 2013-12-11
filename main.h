@@ -7,14 +7,24 @@
  *
  */
 
+// #include <exception>
+
 #ifndef MAIN_H_
 #define MAIN_H_
+
+// #include <exception>
 
 namespace Color {
     typedef float color[3];
 }
 
 const double TAU = 6.283185307179586477; // tau is 2*pi
+
+class clickoutside_except : public std::exception {
+    virtual const char* what() const throw() {
+        return "Clicked outside the window";
+    }
+} clicked_outside;
 
 class Player {
 public:
@@ -32,16 +42,16 @@ class Terr {
 public:
 
     // longitude and latitude in degrees. East and North are positive
-    float x, y; // TODO: should be const?
+    float x, y;
     // three-vector from the center of the earth
     double x0, y0, z0;
     std::vector<int> frontiers;
-    std::string name; // TODO: should be const?
+    std::string name;
 
     int armies;
     Player *p;
 
-    Terr(float x, float y, const std::string& n) :
+    Terr(const float x, const float y, const std::string& n) :
         x(x), y(y), name(n), armies(1), p(NULL)
     {
         y0 = sin(y*TAU/360);
@@ -59,7 +69,7 @@ void handle_mouse(int button, int state, int x, int y);
 void handle_resize(int w, int h);
 
 void get_click_vec(int alpha, int beta, double &x, double &y, double &z);
-// Terr *get_click_terr(int alpha, int beta);
+std::vector<Terr>::iterator get_click_terr(int alpha, int beta);
 
 void draw_scene();
 void draw_single_army(const Color::color c, float x, float y,
