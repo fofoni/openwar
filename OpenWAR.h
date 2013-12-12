@@ -13,7 +13,9 @@
 #include <QtGui>
 #include <QWidget>
 
-class Screen;
+#include "player.h"
+
+#include "Screen.h"
 
 class OpenWAR : public QMainWindow {
 
@@ -22,7 +24,6 @@ class OpenWAR : public QMainWindow {
 public:
     explicit OpenWAR(QWidget *parent = 0);
 
-    std::vector<Terr> graph; // "map"
     std::vector<Player> players;
 
 private slots:
@@ -57,6 +58,11 @@ private:
     QAction *show_help_act;
     QAction *about_openwar_act;
     QAction *about_qt_act;
+
+    QAction *rot_left_act;
+    QAction *rot_right_act;
+    QAction *rot_down_act;
+    QAction *rot_up_act;
 
     QMenu *file_menu;
     QMenu *edit_menu;

@@ -6,3 +6,5 @@
 !CMakeLists.txt
 openwar
 Makefile
+moc_*
+OpenWAR

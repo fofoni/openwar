@@ -11,6 +11,7 @@
 
 #include "Screen.h"
 #include "OpenWAR.h"
+#include <iostream>
 
 OpenWAR::OpenWAR(QWidget *parent) :
     QMainWindow(parent)
@@ -24,13 +25,13 @@ OpenWAR::OpenWAR(QWidget *parent) :
     open_act = new QAction(QIcon::fromTheme("document-open"),
                            "&Open", this);
     open_act->setShortcuts(QKeySequence::Open);
-    open_act->setStatusTip(trUtf8("Open existing savegame."));
+    open_act->setStatusTip("Open existing savegame.");
     connect(open_act, SIGNAL(triggered()), this, SLOT(open()));
 
     save_act = new QAction(QIcon::fromTheme("document-save"),
                            "&Save", this);
     save_act->setShortcuts(QKeySequence::Save);
-    save_act->setStatusTip(trUtf8("Save game state"));
+    save_act->setStatusTip("Save game state");
     connect(save_act, SIGNAL(triggered()), this, SLOT(save()));
 
     save_as_act = new QAction(QIcon::fromTheme("document-save-as"),
@@ -72,11 +73,11 @@ OpenWAR::OpenWAR(QWidget *parent) :
     connect(show_help_act, SIGNAL(triggered()), this, SLOT(show_help()));
 
     about_openwar_act = new QAction(QIcon::fromTheme("help-about"),
-                                  trUtf8("&About OpenWAR"), this);
+                                    "&About OpenWAR", this);
     connect(about_openwar_act, SIGNAL(triggered()),
             this, SLOT(about_openwar()));
 
-    about_qt_act = new QAction(trUtf8("About &Qt"), this);
+    about_qt_act = new QAction("About &Qt", this);
     connect(about_qt_act, SIGNAL(triggered()), this, SLOT(about_qt()));
 
     /*
@@ -133,7 +134,7 @@ OpenWAR::OpenWAR(QWidget *parent) :
      *
      */
 
-    ctrl_dock = new QDockWidget(trUtf8("Funções"), this);
+    ctrl_dock = new QDockWidget("Control", this);
     ctrl_dock->setAllowedAreas(Qt::LeftDockWidgetArea);
     ctrl_dock->setFeatures(QDockWidget::DockWidgetMovable |
                            QDockWidget::DockWidgetFloatable);
@@ -152,6 +153,47 @@ OpenWAR::OpenWAR(QWidget *parent) :
     this->setCentralWidget(screen);
 
     setWindowTitle("OpenWAR");
+
+    rot_left_act = new QAction("Rotate left", this);
+    QList<QKeySequence> left_shortcut;
+    left_shortcut << QKeySequence(Qt::Key_A) << QKeySequence(Qt::Key_Left);
+    rot_left_act->setShortcuts(left_shortcut);
+    connect(rot_left_act, SIGNAL(triggered()), screen, SLOT(rot_left()));
+    this->addAction(rot_left_act);
+
+    rot_right_act = new QAction("Rotate right", this);
+    QList<QKeySequence> right_shortcut;
+    right_shortcut << QKeySequence(Qt::Key_D) << QKeySequence(Qt::Key_Right);
+    rot_right_act->setShortcuts(right_shortcut);
+    connect(rot_right_act, SIGNAL(triggered()), screen, SLOT(rot_right()));
+    this->addAction(rot_right_act);
+
+    rot_down_act = new QAction("Rotate down", this);
+    QList<QKeySequence> down_shortcut;
+    down_shortcut << QKeySequence(Qt::Key_S) << QKeySequence(Qt::Key_Down);
+    rot_down_act->setShortcuts(down_shortcut);
+    connect(rot_down_act, SIGNAL(triggered()), screen, SLOT(rot_down()));
+    this->addAction(rot_down_act);
+
+    rot_up_act = new QAction("Rotate up", this);
+    QList<QKeySequence> up_shortcut;
+    up_shortcut << QKeySequence(Qt::Key_W) << QKeySequence(Qt::Key_Up);
+    rot_up_act->setShortcuts(up_shortcut);
+    connect(rot_up_act, SIGNAL(triggered()), screen, SLOT(rot_up()));
+    this->addAction(rot_up_act);
+
+    grabKeyboard();
+
+    players.push_back(Player(std::string("p0"), screen->color_red));
+    players.push_back(Player(std::string("p1"), screen->color_green));
+    players.push_back(Player(std::string("p2"), screen->color_blue));
+    players.push_back(Player(std::string("p3"), screen->color_yellow));
+    players.push_back(Player(std::string("p4"), screen->color_white));
+    players.push_back(Player(std::string("p5"), screen->color_black));
+
+    for (std::vector<Terr>::iterator it = screen->graph.begin();
+         it != screen->graph.end(); ++it)
+        it->p = &(players[0]);
 
 }
 
@@ -217,7 +259,7 @@ void OpenWAR::reset_coords() {
 
 void OpenWAR::show_help() {
     QMessageBox msg_box;
-    msg_box.setText("Not implemented yet");
+    msg_box.setText("Not implemented yettt");
     msg_box.setWindowTitle("OpenWAR [info]");
     msg_box.setIcon(QMessageBox::Information);
     msg_box.exec();
