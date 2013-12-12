@@ -9,11 +9,13 @@
 SOURCES      = main.cpp \
                OpenWAR.cpp \
                Screen.cpp \
-               loadpng.cpp
+               loadpng.cpp \
+               Game.cpp
 HEADERS      = main.h \
                OpenWAR.h \
                Screen.h \
                loadpng.h \
-    player.h
+               player.h \
+               Game.h
 QT          += opengl
 LIBS        += -lpng

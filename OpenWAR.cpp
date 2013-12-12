@@ -14,7 +14,7 @@
 #include <iostream>
 
 OpenWAR::OpenWAR(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent), game(NULL)
 {
 
     /*
@@ -173,7 +173,7 @@ OpenWAR::OpenWAR(QWidget *parent) :
      *
      */
 
-    screen = new Screen;
+    screen = new Screen(this);
     this->setCentralWidget(screen);
 
     setWindowTitle("OpenWAR");

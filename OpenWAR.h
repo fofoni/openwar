@@ -15,6 +15,7 @@
 
 #include "player.h"
 
+#include "Game.h"
 #include "Screen.h"
 
 class OpenWAR : public QMainWindow {
@@ -25,6 +26,7 @@ public:
     explicit OpenWAR(QWidget *parent = 0);
 
     std::vector<Player> players;
+    Game *game;
 
 private slots:
     // file
