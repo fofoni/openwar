@@ -278,16 +278,26 @@ void handle_mouse(int button, int state, int alpha, int beta) {
 
 }
 
+inline void make_perspective(GLdouble fovy, GLdouble aspect,
+                    GLdouble zNear, GLdouble zFar) {
+    GLdouble ymax = zNear * tan(fovy * TAU / 720.0);
+    GLdouble ymin = -ymax;
+    GLdouble xmin = ymin * aspect;
+    GLdouble xmax = ymax * aspect;
+    glFrustum(xmin, xmax, ymin, ymax, zNear, zFar);
+}
+
 void handle_resize(int w, int h) {
     window_w = w; window_h = h;
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(
+    make_perspective(
         zoom,                  // camera angle (vertical direction)
         double(w) / double(h), // width-to-height ratio
         .5, 200                // near and far z clipping coordinates
     );
+    // TODO: Qt doc says to put GL_MODELVIEW here. what now?
 }
 
 // TODO: material
@@ -441,12 +451,12 @@ void draw_scene() {
     glLoadIdentity();
 
     // ambient light
-    GLfloat ambient_color[] = {.5, .5, .5, 1};
+    static GLfloat ambient_color[] = {.5, .5, .5, 1};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_color);
 
     // positioned light
-    GLfloat light_color0[] = {5, 5, 5, 1};
-    GLfloat light_pos0[] = {-2, 3, 0, 1};
+    static GLfloat light_color0[] = {5, 5, 5, 1};
+    static GLfloat light_pos0[] = {-2, 3, 0, 1};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_color0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos0);
 
@@ -488,9 +498,6 @@ void draw_scene() {
     for(vector<Terr>::iterator it = graph.begin(); it != graph.end(); ++it) {
         draw_armies(*it, 49);
     }
-
-    // TEMP:
-    draw_single_army(nomade_c, nomade_x, nomade_y);
 
     glutSwapBuffers();
 
