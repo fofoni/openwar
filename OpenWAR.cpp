@@ -22,18 +22,21 @@ OpenWAR::OpenWAR(QWidget *parent) :
      *
      */
 
+    // open
     open_act = new QAction(QIcon::fromTheme("document-open"),
                            "&Open", this);
     open_act->setShortcuts(QKeySequence::Open);
     open_act->setStatusTip("Open existing savegame.");
     connect(open_act, SIGNAL(triggered()), this, SLOT(open()));
 
+    // save
     save_act = new QAction(QIcon::fromTheme("document-save"),
                            "&Save", this);
     save_act->setShortcuts(QKeySequence::Save);
     save_act->setStatusTip("Save game state");
     connect(save_act, SIGNAL(triggered()), this, SLOT(save()));
 
+    // save as
     save_as_act = new QAction(QIcon::fromTheme("document-save-as"),
                               "Save &As", this);
     save_as_act->setShortcuts(QKeySequence::SaveAs);
@@ -41,49 +44,61 @@ OpenWAR::OpenWAR(QWidget *parent) :
         "Save game state in a new file, without overwriting the existing one");
     connect(save_as_act, SIGNAL(triggered()), this, SLOT(save_as()));
 
+    // quit
     quit_act = new QAction(QIcon::fromTheme("application-exit"),
                            "Quit", this);
     quit_act->setShortcuts(QKeySequence::Quit);
     connect(quit_act, SIGNAL(triggered()), this, SLOT(quit()));
 
+    // preferences
     show_prefs_window_act = new QAction("Preferences", this);
     show_prefs_window_act->setShortcuts(QKeySequence::Preferences);
     connect(show_prefs_window_act, SIGNAL(triggered()),
             this, SLOT(show_prefs_window()));
 
+    // zoom in
     zoom_in_act = new QAction(QIcon::fromTheme("zoom-in"),
                               "&Zoom in", this);
     QList<QKeySequence> zoom_in_shortcut;
     zoom_in_shortcut << QKeySequence::ZoomIn << QKeySequence(Qt::Key_Z);
     zoom_in_act->setShortcuts(zoom_in_shortcut);
 
+    // zoom out
     zoom_out_act = new QAction(QIcon::fromTheme("zoom-out"),
                                "Zoom &out", this);
     QList<QKeySequence> zoom_out_shortcut;
     zoom_out_shortcut << QKeySequence::ZoomOut << QKeySequence(Qt::Key_X);
     zoom_out_act->setShortcuts(zoom_out_shortcut);
 
+    // home
     reset_coords_act = new QAction(QIcon::fromTheme("zoom-original"),
                                    "&Reset coordinates", this);
     reset_coords_act->setStatusTip(
         "Get viewport back at default coordinates and world color");
-    connect(reset_coords_act, SIGNAL(triggered()), this, SLOT(reset_coords()));
+    QList<QKeySequence> reset_coords_shortcut;
+    reset_coords_shortcut << QKeySequence(Qt::Key_Home)
+                          << QKeySequence(Qt::Key_H);
+    reset_coords_act->setShortcuts(reset_coords_shortcut);
 
+    // toggle graph/frontiers
     toggle_view_act = new QAction("&Toggle view", this);
     QList<QKeySequence> toggle_shortcut;
     toggle_shortcut << QKeySequence(Qt::Key_Tab) << QKeySequence(Qt::Key_V);
     toggle_view_act->setShortcuts(toggle_shortcut);
 
+    // help
     show_help_act = new QAction(QIcon::fromTheme("help-contents"),
                                 "&Manual", this);
     show_help_act->setShortcuts(QKeySequence::HelpContents);
     connect(show_help_act, SIGNAL(triggered()), this, SLOT(show_help()));
 
+    // about
     about_openwar_act = new QAction(QIcon::fromTheme("help-about"),
                                     "&About OpenWAR", this);
     connect(about_openwar_act, SIGNAL(triggered()),
             this, SLOT(about_openwar()));
 
+    // about qt
     about_qt_act = new QAction("About &Qt", this);
     connect(about_qt_act, SIGNAL(triggered()), this, SLOT(about_qt()));
 
@@ -194,6 +209,23 @@ OpenWAR::OpenWAR(QWidget *parent) :
     connect(zoom_in_act, SIGNAL(triggered()), screen, SLOT(zoom_in()));
     connect(zoom_out_act, SIGNAL(triggered()), screen, SLOT(zoom_out()));
     connect(toggle_view_act, SIGNAL(triggered()), screen, SLOT(toggle_view()));
+
+    darken_act = new QAction("Darker Earth", this);
+    QList<QKeySequence> darken_shortcut;
+    darken_shortcut << QKeySequence(Qt::Key_K);
+    darken_act->setShortcuts(darken_shortcut);
+    connect(darken_act, SIGNAL(triggered()), screen, SLOT(darken()));
+    this->addAction(darken_act);
+
+    lighten_act = new QAction("lighter Earth", this);
+    QList<QKeySequence> lighten_shortcut;
+    lighten_shortcut << QKeySequence(Qt::Key_L);
+    lighten_act->setShortcuts(lighten_shortcut);
+    connect(lighten_act, SIGNAL(triggered()), screen, SLOT(lighten()));
+    this->addAction(lighten_act);
+
+    connect(reset_coords_act, SIGNAL(triggered()),
+            screen, SLOT(reset_coords()));
 
     players.push_back(Player(std::string("p0"), screen->color_red));
     players.push_back(Player(std::string("p1"), screen->color_green));

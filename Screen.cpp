@@ -204,23 +204,9 @@ void Screen::mouseReleaseEvent(QMouseEvent *event) {
     msg_box.exec();
 }
 
-void Screen::keyReleaseEvent(QKeyEvent *event) {
+/*void Screen::keyReleaseEvent(QKeyEvent *event) {
 
     switch (event->key()) {
-        case Qt::Key_Z: // TODO: make possible to Ctrl+Plus
-            if (zoom >= 10) zoom -= 5;
-//            handle_resize(window_w, window_h);
-            break;
-        case Qt::Key_X: //                    and Ctrl+Minus
-            if (zoom <= 170) zoom += 5;
-//            handle_resize(window_w, window_h);
-            break;
-        case Qt::Key_K:
-            if (darkening >= 1) darkening -= 1;
-            break;
-        case Qt::Key_L:
-            if (darkening <= 9) darkening += 1;
-            break;
         case Qt::Key_H: case Qt::Key_Home:
             longitude = latitude = 0;
             darkening = 10;
@@ -232,7 +218,7 @@ void Screen::keyReleaseEvent(QKeyEvent *event) {
 
     updateGL();
 
-}
+}*/
 
 /**********************************
 ************** SLOTS **************
@@ -258,6 +244,17 @@ void Screen::zoom_in() {
 
 void Screen::zoom_out() {
     if (zoom <= 170) zoom += 5;
+    resizeGL(width(), height()); updateGL();
+}
+
+void Screen::darken()  { if (darkening >= 1) darkening -= 1; updateGL(); }
+void Screen::lighten() { if (darkening <= 9) darkening += 1; updateGL(); }
+
+void Screen::reset_coords() {
+    longitude = latitude = 0;
+    darkening = 10;
+    zoom = 50;
+    world_curr_tex = world_tex_map;
     resizeGL(width(), height()); updateGL();
 }
 

@@ -82,17 +82,18 @@ public slots:
     void rot_right();
     void rot_down();
     void rot_up();
-
     void zoom_in();
     void zoom_out();
     void toggle_view();
+    void darken();
+    void lighten();
+    void reset_coords();
 
 protected:
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int h);
     void mouseReleaseEvent(QMouseEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
 
 private:
     /********************** definitions **********************/

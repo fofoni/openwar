@@ -64,6 +64,8 @@ private:
     QAction *rot_right_act;
     QAction *rot_down_act;
     QAction *rot_up_act;
+    QAction *darken_act;
+    QAction *lighten_act;
 
     QMenu *file_menu;
     QMenu *edit_menu;
