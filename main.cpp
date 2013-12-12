@@ -29,124 +29,19 @@
 
 #include <cmath>
 
-/********************************************
-************** OpenGL includes **************
-********************************************/
+/****************************************
+************** Qt includes **************
+****************************************/
 
-#include <GL/glew.h>
-#ifdef __APPLE__
-# include <OpenGL/OpenGL.h>
-# include <GLUT/glut.h>
-#else
-# include <GL/glut.h>
-#endif
+#include <QtGui>
 
-#include "loadpng.h"
-
-/***********************************
-************** main.h **************
-***********************************/
+/*******************************************
+************** local includes **************
+*******************************************/
 
 #include "main.h"
-
-/****************************************
-************** definitions **************
-****************************************/
-
-// version string
-#define TOSTR_(x...) #x // needs to be variadic because x might contain commas
-#define STRINGIFY(x) TOSTR_(x)
-#ifdef OpenWAR_VERSION
-# define OpenWAR_VERSION_STR STRINGIFY(OpenWAR_VERSION)
-#else
-# define OpenWAR_VERSION_STR "v???"
-#endif
-
-namespace Key {
-    static const unsigned char ESC = 27;
-}
-
-namespace Color {
-    static const color black = {0, 0, 0};
-    static const color dark_blue = {0, 0, .5};
-    static const color blue = {0, 0, 1};
-    static const color dark_green = {0, .5, 0};
-    static const color dark_cyan = {0, .5, .5};
-    static const color sea_blue = {0, .5, 1};
-    static const color green = {0, 1, 0};
-    static const color sea_green = {0, 1, .5};
-    static const color cyan = {0, 1, 1};
-    static const color dark_red = {.5, 0, 0};
-    static const color dark_magenta = {.5, 0, .5};
-    static const color purple = {.5, 0, 1};
-    static const color dark_yellow = {.5, .5, 0};
-    static const color gray = {.5, .5, .5};
-    static const color light_blue = {.5, .5, 1};
-    static const color lime = {.5, 1, 0};
-    static const color light_green = {.5, 1, .5};
-    static const color light_cyan = {.5, 1, 1};
-    static const color red = {1, 0, 0};
-    static const color pink = {1, 0, .5};
-    static const color magenta = {1, 0, 1};
-    static const color orange = {1, .5, 0};
-    static const color light_red = {1, .5, .5};
-    static const color light_magenta = {1, .5, 1};
-    static const color yellow = {1, 1, 0};
-    static const color light_yellow = {1, 1, .5};
-    static const color white = {1, 1, 1};
-}
-
-const int CAMERA_DISTANCE = 3; // distance from cam to center of the earth
-
-const int WORLD_LAT_QTD = 50; // TODO: make these configurable at runtime (when we get Qt)
-const int WORLD_LONG_QTD = 100;
-
-const int ARMY_LONG_QTD = 50; // num of sides of poligon quantizing the circle
-const float ARMY_HEIGHT = .0135; // height of outer cilinder
-const float ARMY_RAD = .025; // radius of outer colinder
-const float ARMY_IN_PERC = 0.70; // ratio between the inner and outer radii
-const float ARMY_HOLE_PERC = 0.30; // height of hole over height of cilinder
-const float ARMY_BIG_PERC = 1.25; // ratio between big and common armies
-const float ARMY_GHOST_PERC = 1.1;
-static const float ARMY_HS[] = { // heights
-    ARMY_HEIGHT * ARMY_HOLE_PERC,
-    ARMY_HEIGHT * (1-ARMY_HOLE_PERC)
-};
-static const float ARMY_HS_BIG[] = { // big heights
-    ARMY_HEIGHT * ARMY_HOLE_PERC * ARMY_BIG_PERC,
-    ARMY_HEIGHT * (1-ARMY_HOLE_PERC) * ARMY_BIG_PERC
-};
-
-const double WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
-const double WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
-const double ARMY_LONG_EPS = TAU/double(ARMY_LONG_QTD);
-
-/****************************************
-************** global vars **************
-****************************************/
-
-int window_w, window_h; // glut window size
-
-// viewing
-int latitude = 0, longitude = 0; // coordinates of center of vision
-int zoom = 50; // camera angle in degrees
-int darkening = 10; // 0 is completely dark, 10 is normal.
-
-GLuint world_tex_map, world_tex_graph, world_curr_tex;
-int wtm_width = 1024, wtm_height = 1024,
-    wtg_width = 1024, wtg_height = 1024;
-
-float sph_vertices[WORLD_LONG_QTD+1][WORLD_LAT_QTD+1][3];
-float army_vertices[ARMY_LONG_QTD+1][2][2];
-
-std::vector<Terr> graph; // "map"
-
-std::vector<Player> players;
-
-// TEMP:
-float nomade_x = 0;
-float nomade_y = 0;
-const float *nomade_c = Color::black;
+#include "loadpng.h"
+#include "OpenWAR.h"
 
 /*************************************************
 ************** GLUT and GL routines **************
@@ -154,10 +49,8 @@ const float *nomade_c = Color::black;
 
 using namespace std;
 
-void handle_keypress(unsigned char key, int x, int y) {
+/*void handle_keypress(unsigned char key, int x, int y) {
     switch (key) {
-        case Key::ESC:
-            /*throw escape*/; break;
         case 'a':
             longitude -= -zoom/5;
             break;
@@ -199,7 +92,7 @@ void handle_keypress(unsigned char key, int x, int y) {
             break;
     }
     glutPostRedisplay();
-}
+}*/
 
 void init_render() {
 
@@ -218,7 +111,8 @@ void init_render() {
 
 }
 
-void get_click_vec(const int alpha, const int beta, double &x0, double &y0, double &z0) {
+void get_click_vec(const int alpha, const int beta,
+                   double &x0, double &y0, double &z0) {
 
     double a = double(alpha - .5*window_w)/double(window_h);
     double b = .5 - double(beta)/double(window_h);

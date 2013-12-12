@@ -7,12 +7,8 @@
  *
  */
 
-// #include <exception>
-
 #ifndef MAIN_H_
 #define MAIN_H_
-
-// #include <exception>
 
 namespace Color {
     typedef float color[3];
