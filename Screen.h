@@ -83,6 +83,10 @@ public slots:
     void rot_down();
     void rot_up();
 
+    void zoom_in();
+    void zoom_out();
+    void toggle_view();
+
 protected:
     void initializeGL();
     void paintGL();
@@ -105,7 +109,7 @@ private:
     static const float ARMY_RAD = .025; // radius of outer colinder
     static const float ARMY_IN_PERC = 0.70; // ratio inner/outer radii
     static const float ARMY_HOLE_PERC = 0.30; // ratio of heights hole/cilinder
-    static const float ARMY_BIG_PERC = 1.25; // ratio big/common armies
+    static const float ARMY_BIG_PERC = 1.4; // ratio big/common armies
     static const float ARMY_GHOST_PERC = 1.1;
     float ARMY_HS_0, ARMY_HS_1; // heights
 

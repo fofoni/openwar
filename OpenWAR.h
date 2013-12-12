@@ -55,6 +55,7 @@ private:
     QAction *zoom_in_act;
     QAction *zoom_out_act;
     QAction *reset_coords_act;
+    QAction *toggle_view_act;
     QAction *show_help_act;
     QAction *about_openwar_act;
     QAction *about_qt_act;

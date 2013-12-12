@@ -132,7 +132,6 @@ void Screen::resizeGL(int w, int h) {
         double(w) / double(h), // width-to-height ratio
         .5, 200                // near and far z clipping coordinates
     );
-    // TODO: Qt doc says to put GL_MODELVIEW here. what now?
 }
 
 void Screen::paintGL() {
@@ -189,7 +188,7 @@ void Screen::paintGL() {
     // draw armies
     for (std::vector<Terr>::iterator it = graph.begin();
          it != graph.end(); ++it) {
-        draw_armies(*it, 29);
+        draw_armies(*it, 9);
     }
 
 }
@@ -208,24 +207,6 @@ void Screen::mouseReleaseEvent(QMouseEvent *event) {
 void Screen::keyReleaseEvent(QKeyEvent *event) {
 
     switch (event->key()) {
-        case Qt::Key_A: case Qt::Key_Left:
-            longitude -= -zoom/5;
-            break;
-        case Qt::Key_D: case Qt::Key_Right:
-            longitude += -zoom/5;
-            break;
-        case Qt::Key_S: case Qt::Key_Down:
-            latitude -= zoom/5;
-            break;
-        case Qt::Key_W: case Qt::Key_Up:
-            latitude += zoom/5;
-            break;
-        case Qt::Key_V: case Qt::Key_Tab:
-            if (world_curr_tex == world_tex_map)
-                world_curr_tex = world_tex_graph;
-            else
-                world_curr_tex = world_tex_map;
-            break;
         case Qt::Key_Z: // TODO: make possible to Ctrl+Plus
             if (zoom >= 10) zoom -= 5;
 //            handle_resize(window_w, window_h);
@@ -261,6 +242,24 @@ void Screen::rot_left()  { longitude -= -zoom/5; updateGL(); }
 void Screen::rot_right() { longitude += -zoom/5; updateGL(); }
 void Screen::rot_down()  { latitude  -= +zoom/5; updateGL(); }
 void Screen::rot_up()    { latitude  += +zoom/5; updateGL(); }
+
+void Screen::toggle_view() {
+    if (world_curr_tex == world_tex_map)
+        world_curr_tex = world_tex_graph;
+    else
+        world_curr_tex = world_tex_map;
+    updateGL();
+}
+
+void Screen::zoom_in() {
+    if (zoom >= 10) zoom -= 5;
+    resizeGL(width(), height()); updateGL();
+}
+
+void Screen::zoom_out() {
+    if (zoom <= 170) zoom += 5;
+    resizeGL(width(), height()); updateGL();
+}
 
 /**********************************************
 ************** Graphics routines **************
@@ -440,24 +439,24 @@ void Screen::draw_armies(const Terr& terr, int qtd) {
                 break;
             case 1:
                 for (int i = 0; i < quotient; i++)
-                    draw_single_army(c,x,y, i, true, -1.7, 0);
-                draw_single_army(c,x,y, 0, false, 1.7, 0);
+                    draw_single_army(c,x,y, i, true, -1.5, 0);
+                draw_single_army(c,x,y, 0, false, 2.2, 0);
                 break;
             case 2:
                 for (int i = 0; i < quotient; i++)
-                    draw_single_army(c,x,y, i, true, -1.55, 0);
-                draw_single_army(c,x,y, 0, false, 1.55, -1.5);
-                draw_single_army(c,x,y, 0, false, 1.55,  1.5);
+                    draw_single_army(c,x,y, i, true, -1.7, 0);
+                draw_single_army(c,x,y, 0, false, 1.7, -1.5);
+                draw_single_army(c,x,y, 0, false, 1.7,  1.5);
                 break;
             case 4:
-                draw_single_army(c,x,y, 1, false,  .85, 0);
+                draw_single_army(c,x,y, 1, false,  1.45, 0);
                 // fall through
             case 3:
                 for (int i = 0; i < quotient; i++)
-                    draw_single_army(c,x,y, i, true,  -3.1, 0);
-                draw_single_army(c,x,y, 0, false,    0, -1.5);
-                draw_single_army(c,x,y, 0, false,    0,  1.5);
-                draw_single_army(c,x,y, 0, false, 2.54, 0);
+                    draw_single_army(c,x,y, i, true,  -3.0, 0);
+                draw_single_army(c,x,y, 0, false,   .6, -1.5);
+                draw_single_army(c,x,y, 0, false,   .6,  1.5);
+                draw_single_army(c,x,y, 0, false, 3.14, 0);
                 break;
         }
 }

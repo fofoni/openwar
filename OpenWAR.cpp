@@ -53,19 +53,26 @@ OpenWAR::OpenWAR(QWidget *parent) :
 
     zoom_in_act = new QAction(QIcon::fromTheme("zoom-in"),
                               "&Zoom in", this);
-    zoom_in_act->setShortcuts(QKeySequence::ZoomIn);
-    connect(zoom_in_act, SIGNAL(triggered()), this, SLOT(zoom_in()));
+    QList<QKeySequence> zoom_in_shortcut;
+    zoom_in_shortcut << QKeySequence::ZoomIn << QKeySequence(Qt::Key_Z);
+    zoom_in_act->setShortcuts(zoom_in_shortcut);
 
     zoom_out_act = new QAction(QIcon::fromTheme("zoom-out"),
                                "Zoom &out", this);
-    zoom_out_act->setShortcuts(QKeySequence::ZoomOut);
-    connect(zoom_out_act, SIGNAL(triggered()), this, SLOT(zoom_out()));
+    QList<QKeySequence> zoom_out_shortcut;
+    zoom_out_shortcut << QKeySequence::ZoomOut << QKeySequence(Qt::Key_X);
+    zoom_out_act->setShortcuts(zoom_out_shortcut);
 
     reset_coords_act = new QAction(QIcon::fromTheme("zoom-original"),
                                    "&Reset coordinates", this);
     reset_coords_act->setStatusTip(
         "Get viewport back at default coordinates and world color");
     connect(reset_coords_act, SIGNAL(triggered()), this, SLOT(reset_coords()));
+
+    toggle_view_act = new QAction("&Toggle view", this);
+    QList<QKeySequence> toggle_shortcut;
+    toggle_shortcut << QKeySequence(Qt::Key_Tab) << QKeySequence(Qt::Key_V);
+    toggle_view_act->setShortcuts(toggle_shortcut);
 
     show_help_act = new QAction(QIcon::fromTheme("help-contents"),
                                 "&Manual", this);
@@ -100,6 +107,8 @@ OpenWAR::OpenWAR(QWidget *parent) :
     view_menu->addAction(zoom_out_act);
     view_menu->addSeparator();
     view_menu->addAction(reset_coords_act);
+    view_menu->addSeparator();
+    view_menu->addAction(toggle_view_act);
 
     help_menu = menuBar()->addMenu("&Help");
     help_menu->addAction(show_help_act);
@@ -156,33 +165,35 @@ OpenWAR::OpenWAR(QWidget *parent) :
 
     rot_left_act = new QAction("Rotate left", this);
     QList<QKeySequence> left_shortcut;
-    left_shortcut << QKeySequence(Qt::Key_A) << QKeySequence(Qt::Key_Left);
+    left_shortcut << QKeySequence(Qt::Key_Left) << QKeySequence(Qt::Key_A);
     rot_left_act->setShortcuts(left_shortcut);
     connect(rot_left_act, SIGNAL(triggered()), screen, SLOT(rot_left()));
     this->addAction(rot_left_act);
 
     rot_right_act = new QAction("Rotate right", this);
     QList<QKeySequence> right_shortcut;
-    right_shortcut << QKeySequence(Qt::Key_D) << QKeySequence(Qt::Key_Right);
+    right_shortcut << QKeySequence(Qt::Key_Right) << QKeySequence(Qt::Key_D);
     rot_right_act->setShortcuts(right_shortcut);
     connect(rot_right_act, SIGNAL(triggered()), screen, SLOT(rot_right()));
     this->addAction(rot_right_act);
 
     rot_down_act = new QAction("Rotate down", this);
     QList<QKeySequence> down_shortcut;
-    down_shortcut << QKeySequence(Qt::Key_S) << QKeySequence(Qt::Key_Down);
+    down_shortcut << QKeySequence(Qt::Key_Down) << QKeySequence(Qt::Key_S);
     rot_down_act->setShortcuts(down_shortcut);
     connect(rot_down_act, SIGNAL(triggered()), screen, SLOT(rot_down()));
     this->addAction(rot_down_act);
 
     rot_up_act = new QAction("Rotate up", this);
     QList<QKeySequence> up_shortcut;
-    up_shortcut << QKeySequence(Qt::Key_W) << QKeySequence(Qt::Key_Up);
+    up_shortcut << QKeySequence(Qt::Key_Up) << QKeySequence(Qt::Key_W);
     rot_up_act->setShortcuts(up_shortcut);
     connect(rot_up_act, SIGNAL(triggered()), screen, SLOT(rot_up()));
     this->addAction(rot_up_act);
 
-    grabKeyboard();
+    connect(zoom_in_act, SIGNAL(triggered()), screen, SLOT(zoom_in()));
+    connect(zoom_out_act, SIGNAL(triggered()), screen, SLOT(zoom_out()));
+    connect(toggle_view_act, SIGNAL(triggered()), screen, SLOT(toggle_view()));
 
     players.push_back(Player(std::string("p0"), screen->color_red));
     players.push_back(Player(std::string("p1"), screen->color_green));
