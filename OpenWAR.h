@@ -30,6 +30,7 @@ public:
 
 private slots:
     // file
+    void newgame();
     void open();
     void save();
     void save_as();
@@ -38,17 +39,13 @@ private slots:
     // edit
     void show_prefs_window();
 
-    // view
-    void zoom_in();
-    void zoom_out();
-    void reset_coords();
-
     // help
     void show_help();
     void about_openwar();
     void about_qt();
 
 private:
+    QAction *newgame_act;
     QAction *open_act;
     QAction *save_act;
     QAction *save_as_act;

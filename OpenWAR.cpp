@@ -11,7 +11,7 @@
 
 #include "Screen.h"
 #include "OpenWAR.h"
-#include <iostream>
+#include "newgamedialog.h"
 
 OpenWAR::OpenWAR(QWidget *parent) :
     QMainWindow(parent), game(NULL)
@@ -21,6 +21,13 @@ OpenWAR::OpenWAR(QWidget *parent) :
      * ACTIONS
      *
      */
+
+    // new
+    newgame_act = new QAction(QIcon::fromTheme("document-new"), "&New Game",
+                              this);
+    newgame_act->setShortcuts(QKeySequence::New);
+    newgame_act->setToolTip("Start a new game.");
+    connect(newgame_act, SIGNAL(triggered()), this, SLOT(newgame()));
 
     // open
     open_act = new QAction(QIcon::fromTheme("document-open"),
@@ -108,6 +115,7 @@ OpenWAR::OpenWAR(QWidget *parent) :
      */
 
     file_menu = menuBar()->addMenu("&File");
+    file_menu->addAction(newgame_act);
     file_menu->addAction(open_act);
     file_menu->addAction(save_act);
     file_menu->addAction(save_as_act);
@@ -137,6 +145,7 @@ OpenWAR::OpenWAR(QWidget *parent) :
      */
 
     toolbar = addToolBar("Toolbar");
+    toolbar->addAction(newgame_act);
     toolbar->addAction(open_act);
     toolbar->addAction(save_act);
     toolbar->addSeparator();
@@ -240,6 +249,15 @@ OpenWAR::OpenWAR(QWidget *parent) :
 
 }
 
+void OpenWAR::newgame() {
+    game = new Game;
+    NewGameDialog *form_dialog = new NewGameDialog(this);
+    int num_players;
+    QList<QString> player_names;
+    QList<QColor> player_colors;
+    form_dialog->run(num_players, player_names, player_colors);
+}
+
 void OpenWAR::open() {
     QMessageBox msg_box;
     msg_box.setText("Not implemented yet");
@@ -269,30 +287,6 @@ void OpenWAR::quit() {
 }
 
 void OpenWAR::show_prefs_window() {
-    QMessageBox msg_box;
-    msg_box.setText("Not implemented yet");
-    msg_box.setWindowTitle("OpenWAR [info]");
-    msg_box.setIcon(QMessageBox::Information);
-    msg_box.exec();
-}
-
-void OpenWAR::zoom_in() {
-    QMessageBox msg_box;
-    msg_box.setText("Not implemented yet");
-    msg_box.setWindowTitle("OpenWAR [info]");
-    msg_box.setIcon(QMessageBox::Information);
-    msg_box.exec();
-}
-
-void OpenWAR::zoom_out() {
-    QMessageBox msg_box;
-    msg_box.setText("Not implemented yet");
-    msg_box.setWindowTitle("OpenWAR [info]");
-    msg_box.setIcon(QMessageBox::Information);
-    msg_box.exec();
-}
-
-void OpenWAR::reset_coords() {
     QMessageBox msg_box;
     msg_box.setText("Not implemented yet");
     msg_box.setWindowTitle("OpenWAR [info]");
