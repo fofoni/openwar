@@ -72,8 +72,6 @@ private:
 
     QToolBar *toolbar;
 
-    QDockWidget *ctrl_dock;
-
     QListWidget *func_listwidget;
     Screen *screen;
 

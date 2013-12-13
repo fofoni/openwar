@@ -166,21 +166,6 @@ OpenWAR::OpenWAR(QWidget *parent) :
     statusBar()->showMessage(QString("OpenWAR"));
 
     /*
-     * CONTROL DOCK
-     *
-     */
-
-    ctrl_dock = new QDockWidget("Control", this);
-    ctrl_dock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    ctrl_dock->setFeatures(QDockWidget::DockWidgetMovable |
-                           QDockWidget::DockWidgetFloatable);
-    func_listwidget = new QListWidget(ctrl_dock);
-    // example function
-    /// FAZER SLOT ADD_FUNC
-    ctrl_dock->setWidget(func_listwidget);
-    addDockWidget(Qt::LeftDockWidgetArea, ctrl_dock);
-
-    /*
      * SCREEN
      *
      */

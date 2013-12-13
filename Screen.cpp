@@ -188,13 +188,13 @@ void Screen::paintGL() {
 
 void Screen::mouseReleaseEvent(QMouseEvent *event) {
     QMessageBox msg_box;
-    QString text;
-    try { text = get_click_terr(event->x(), event->y())->name; }
+    try { get_click_terr(event->x(), event->y())->armies++; }
     catch (clickoutside_except& e) { return; }
-    msg_box.setText(text);
+    updateGL();
+    /*msg_box.setText(text);
     msg_box.setWindowTitle("OpenWAR [clicked]");
     msg_box.setIcon(QMessageBox::Information);
-    msg_box.exec();
+    msg_box.exec();*/
 }
 
 /**********************************
@@ -383,7 +383,7 @@ void Screen::draw_single_army(const QColor& c, float x, float y,
 }
 
 void Screen::draw_armies(const Terr& terr) {
-    if (terr.armies == 0) return;
+    if (terr.armies == 0 || terr.p == NULL) return;
     int quotient = terr.armies/5, remainder = terr.armies % 5;
     const QColor& c = terr.p->c; // c.darker()
     const float& x = terr.x;
