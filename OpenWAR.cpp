@@ -271,6 +271,7 @@ void OpenWAR::newgame() {
     ss << "Ordem: ";
     ss << game->players[0].html();
     for (int i = 1; i < num_players; i++) {
+        // make more informative: one line for each player, and number of terrs in parenthesis
         ss << ", " << game->players[i].html();
     }
     ss << ".";
