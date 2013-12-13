@@ -59,15 +59,9 @@ public:
     void draw_single_army(const QColor &c, float x, float y,
                           float h=0, bool big=0,
                           float dx=0, float dy=false);
-    void draw_armies(const Terr& terr, int qtd);
+    void draw_armies(const Terr& terr);
 
-    QColor color_red;
-    QColor color_green;
-    QColor color_blue;
-    QColor color_yellow;
-    QColor color_white;
-    QColor color_black;
-    QColor color_backgr;
+    void destroy_armies();
 
     // viewing
     int latitude, longitude; // coordinates of center of vision

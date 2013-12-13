@@ -18,6 +18,7 @@
 
 #include "Screen.h"
 #include "loadpng.h"
+#include "colors.h"
 
 Screen::Screen(QWidget *parent) :
     QGLWidget(parent), latitude(0), longitude(0), zoom(50), darkening(10),
@@ -29,14 +30,6 @@ Screen::Screen(QWidget *parent) :
     WORLD_LAT_EPS = TAU/double(2*WORLD_LAT_QTD);
     WORLD_LONG_EPS = TAU/double(WORLD_LONG_QTD);
     ARMY_LONG_EPS = TAU/double(ARMY_LONG_QTD);
-
-    color_red    = QColor::fromRgbF(.5 , 0  , 0  );
-    color_green  = QColor::fromRgbF(0  , .5 , 0  );
-    color_blue   = QColor::fromRgbF(0  , 0  , .5 );
-    color_yellow = QColor::fromRgbF(.35, .35, 0  );
-    color_white  = QColor::fromRgbF(.3 , .3 , .3 );
-    color_black  = QColor::fromRgbF(.05, .05, .05);
-    color_backgr = QColor::fromRgbF(.14, .18, .2 );
 
     // sphere vertices
     for (int j = 0; j <= WORLD_LAT_QTD; j++) {
@@ -109,8 +102,9 @@ void Screen::initializeGL() {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_COLOR_MATERIAL);
-    glClearColor(color_backgr.redF(), color_backgr.greenF(),
-                 color_backgr.blueF(), 1);
+    glClearColor(WARColor_BACKGR.redF(),
+                 WARColor_BACKGR.greenF(),
+                 WARColor_BACKGR.blueF(), 1);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE);
@@ -187,9 +181,8 @@ void Screen::paintGL() {
 
     // draw armies
     for (std::vector<Terr>::iterator it = graph.begin();
-         it != graph.end(); ++it) {
-        draw_armies(*it, 9);
-    }
+         it != graph.end(); ++it)
+        draw_armies(*it);
 
 }
 
@@ -203,22 +196,6 @@ void Screen::mouseReleaseEvent(QMouseEvent *event) {
     msg_box.setIcon(QMessageBox::Information);
     msg_box.exec();
 }
-
-/*void Screen::keyReleaseEvent(QKeyEvent *event) {
-
-    switch (event->key()) {
-        case Qt::Key_H: case Qt::Key_Home:
-            longitude = latitude = 0;
-            darkening = 10;
-            zoom = 50;
-            world_curr_tex = world_tex_map;
-//            handle_resize(window_w, window_h);
-            break;
-    }
-
-    updateGL();
-
-}*/
 
 /**********************************
 ************** SLOTS **************
@@ -405,10 +382,10 @@ void Screen::draw_single_army(const QColor& c, float x, float y,
 
 }
 
-void Screen::draw_armies(const Terr& terr, int qtd) {
-    int quotient = qtd/5, remainder = qtd % 5;
-    const QColor& c = terr.p->c.darker();
-//    std::cout << r << " " << g << " " << b << std::endl;
+void Screen::draw_armies(const Terr& terr) {
+    if (terr.armies == 0) return;
+    int quotient = terr.armies/5, remainder = terr.armies % 5;
+    const QColor& c = terr.p->c; // c.darker()
     const float& x = terr.x;
     const float& y = terr.y;
     if (quotient == 0)
@@ -456,4 +433,12 @@ void Screen::draw_armies(const Terr& terr, int qtd) {
                 draw_single_army(c,x,y, 0, false, 3.14, 0);
                 break;
         }
+}
+
+void Screen::destroy_armies() {
+    for (std::vector<Terr>::iterator it = graph.begin();
+         it != graph.end(); ++it) {
+        it->armies = 0;
+        it->p = NULL;
+    }
 }

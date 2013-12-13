@@ -59,12 +59,4 @@ int main(int argc, char** argv) {
 
     return app.exec();
 
-    // TODO: Qt GUI
-    /*players.push_back(Player(string("p0"), Color::dark_cyan));
-    players.push_back(Player(string("p1"), Color::dark_magenta));
-    players.push_back(Player(string("p2"), Color::dark_yellow));
-    players.push_back(Player(string("p3"), Color::dark_red));
-    players.push_back(Player(string("p4"), Color::dark_green));
-    players.push_back(Player(string("p5"), Color::dark_blue));*/
-
 }

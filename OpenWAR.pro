@@ -18,6 +18,8 @@ HEADERS      = main.h \
                loadpng.h \
                player.h \
                Game.h \
-    newgamedialog.h
+    newgamedialog.h \
+    colors.h \
+    terr.h
 QT          += opengl
 LIBS        += -lpng

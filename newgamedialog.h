@@ -11,7 +11,7 @@ class NewGameDialog : public QDialog
 
 public:
     explicit NewGameDialog(QWidget *parent = 0);
-    void run(int& num_players, QList<QString>& names, QList<QColor>& colors);
+    bool run(int& qtd, QList<QString>& names, QList<QColor>& colors);
 
     int num_players;
     QList<QString> player_names;
@@ -27,9 +27,15 @@ private:
     QList<QLabel *> player_labels;
     QList<QLineEdit *> player_names_edit;
     QList<QComboBox *> player_colors_combo;
+    QDialogButtonBox *button_box;
+
+    bool names_are_ok();
+    bool colors_are_ok();
 
 private slots:
     void set_num_players(int n);
+    void set_names_list();
+    void set_colors_list();
 
 };
 

@@ -7,11 +7,14 @@
  *
  */
 
+#include <sstream>
+
 #include <QtGui>
 
 #include "Screen.h"
 #include "OpenWAR.h"
 #include "newgamedialog.h"
+#include "colors.h"
 
 OpenWAR::OpenWAR(QWidget *parent) :
     QMainWindow(parent), game(NULL)
@@ -236,26 +239,46 @@ OpenWAR::OpenWAR(QWidget *parent) :
     connect(reset_coords_act, SIGNAL(triggered()),
             screen, SLOT(reset_coords()));
 
-    players.push_back(Player(std::string("p0"), screen->color_red));
-    players.push_back(Player(std::string("p1"), screen->color_green));
-    players.push_back(Player(std::string("p2"), screen->color_blue));
-    players.push_back(Player(std::string("p3"), screen->color_yellow));
-    players.push_back(Player(std::string("p4"), screen->color_white));
-    players.push_back(Player(std::string("p5"), screen->color_black));
-
-    for (std::vector<Terr>::iterator it = screen->graph.begin();
-         it != screen->graph.end(); ++it)
-        it->p = &(players[0]);
-
 }
 
 void OpenWAR::newgame() {
-    game = new Game;
+
+    if (game) {
+        QMessageBox msg_box;
+        msg_box.setText(
+            "Are you sure you want to stop and discard the current game?"
+        );
+        msg_box.setWindowTitle("OpenWAR [are you sure?]");
+        msg_box.setIcon(QMessageBox::Warning);
+        msg_box.addButton(QMessageBox::Yes);
+        msg_box.addButton(QMessageBox::No);
+        msg_box.exec();
+        if (msg_box.result() == QMessageBox::No) return;
+    }
+
     NewGameDialog *form_dialog = new NewGameDialog(this);
     int num_players;
     QList<QString> player_names;
     QList<QColor> player_colors;
-    form_dialog->run(num_players, player_names, player_colors);
+    if (! form_dialog->run(num_players, player_names, player_colors))
+        return;
+    screen->destroy_armies();
+    if (game) delete game;
+    game = new Game(screen->graph, num_players, player_names, player_colors);
+
+    QMessageBox msg_box;
+    std::stringstream ss;
+    ss << "Ordem: ";
+    ss << game->players[0].html();
+    for (int i = 1; i < num_players; i++) {
+        ss << ", " << game->players[i].html();
+    }
+    ss << ".";
+    msg_box.setText(ss.str().c_str());
+    msg_box.setWindowTitle("OpenWAR [info]");
+    msg_box.setIcon(QMessageBox::Information);
+    msg_box.exec();
+
 }
 
 void OpenWAR::open() {
@@ -311,9 +334,5 @@ void OpenWAR::about_openwar() {
 }
 
 void OpenWAR::about_qt() {
-    QMessageBox msg_box;
-    msg_box.setText("Not implemented yet");
-    msg_box.setWindowTitle("OpenWAR [info]");
-    msg_box.setIcon(QMessageBox::Information);
-    msg_box.exec();
+    QMessageBox::aboutQt(this);
 }
