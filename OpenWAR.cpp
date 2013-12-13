@@ -304,9 +304,25 @@ void OpenWAR::show_prefs_window() {
 }
 
 void OpenWAR::show_help() {
-    QMessageBox msg_box;
-    msg_box.setText("Not implemented yettt");
-    msg_box.setWindowTitle("OpenWAR [info]");
+    QMessageBox msg_box(this);
+    std::stringstream ss;
+    ss << "<font size='20'><center><b>OpenWAR</b></center></font><br /><br />";
+    ss << "<b>Para visualizar o globo:</b><br />";
+    ss << "- Teclas de \"setinhas\" andam pelo globo (alternativamente, teclas ASDW)<br />";
+    ss << "- Teclas Z e X fazem zoom in e out<br />";
+    ss << "- Tecla TAB (ou alternativamente, V) muda o tipo de mapa<br />";
+    ss << "- Teclas K e L deixam o modelo do globo mais escuro ou mais claro (o que pode ajudar a ver melhor as pecinhas)<br />";
+    ss << "- Tecla H volta para a posicao/mapa/cor normal<br />";
+    ss << "- Outros shortcuts podem ser vistos no menu View<br /><br />";
+    ss << "<b>Para iniciar um novo jogo:</b><br />";
+    ss << "- Clique em File -> New<br />";
+    ss << "- Escolha os nomes e cores dos jogadores<br />";
+    ss << "- Os jogadores vao ser ordenados aleatoriamente<br /><br />";
+    ss << "<b>A unica coisa que e possivel fazer nessa versao do jogo eh:</b><br />";
+    ss << "- Clique em um territorio para adicionar exercitos a ele.<br />";
+    ss << "- Lembre-se de que uma pecinha grande vale cinco pecinhas pequenas";
+    msg_box.setText(ss.str().c_str());
+    msg_box.setWindowTitle("OpenWAR [help]");
     msg_box.setIcon(QMessageBox::Information);
     msg_box.exec();
 }
