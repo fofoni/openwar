@@ -16,6 +16,8 @@
 
 using namespace std;
 
+// TODO: find a way of reading also RGBA files, instead of just RGB
+
 GLuint loadpng(const string filename, int &width, int &height)
 {
     // header for testing if it is a png
