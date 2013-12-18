@@ -251,6 +251,7 @@ void Screen::get_click_vec(const int alpha, const int beta,
     // zoom is theta in degrees; tan(phi) = 2*tan(theta/2)*norm((a,b))
     double tan2p = 4 * tan(zoom*TAU/720)*tan(zoom*TAU/720) * norm2_ab;
     double cos2p = 1/(1+tan2p);
+    // TODO: are we _really_ calculating 1/cos2p when cos2p is defined as 1/something_else ??
     double discriminant = 1/cos2p - tan2p*CAMERA_DISTANCE*CAMERA_DISTANCE;
 
     if (discriminant < 0) throw clicked_outside;
