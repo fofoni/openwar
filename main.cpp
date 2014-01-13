@@ -7,6 +7,13 @@
  *
  */
 
+/**
+  * TODO: try C++11 and Qt5. Add Doxygen comments. Get doxygen in github-pages.
+  *       make "install" targets (we currently have only a "build" target), The
+  *       install target must ask for a location to put the textures and DBs,
+  *       we must pass this same location to the compiler.
+  */
+
 /*****************************************
 ************** STL includes **************
 *****************************************/
